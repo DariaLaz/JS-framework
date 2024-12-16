@@ -36,48 +36,42 @@ function renderElement(domElement) {
 
     return element;
 }
+
 const PatchType = {
     REMOVE: 'REMOVE',
     REPLACE: 'REPLACE',
     PROPS: 'PROPS',
-    CHILDREN: 'CHILDREN'
+    CHILDREN: 'CHILDREN',
+    ADD: 'ADD',
+    TEXT: 'TEXT'
 };
 
 function diff(oldTree, newTree) {
     const patches = {};
+    let index = 0;
 
-    function dfs(oldTree, newTree, index) {
-        if (!oldTree && !newTree) {
-            return [];
-        }
-        if (!oldTree && newTree) {
-            return [{ type: PatchType['ADD'], index, content: newTree }];
-        }
-
+    function dfs(oldNode, newNode, index) {
         const currentPatch = [];
 
-        console.log(oldTree, newTree);
-        
-        if (newTree === undefined) {
-            currentPatch.push({ type: PatchType["REMOVE"], index });
-        }
-        else if (oldTree.tag !== newTree.tag) {
-            currentPatch.push({ type: PatchType['REPLACE'], index, content: newTree });
-        }
-        else if (typeof oldTree === 'string') {
-            currentPatch.push({ type: PatchType['TEXT'], index, content: newTree });
-        }
-        else {
-            const propsDiff = diffProps(oldTree.props, newTree.props);
-            if (propsDiff && Object.keys(propsDiff).length > 0) {
-                currentPatch.push({ type: PatchType['PROPS'], content: propsDiff });
+        if (!oldNode && newNode) {
+            currentPatch.push({ type: PatchType.ADD, index, content: newNode });
+        } else if (oldNode && !newNode) {
+            currentPatch.push({ type: PatchType.REMOVE, index });
+        } else if (typeof oldNode === 'string' && typeof newNode === 'string') {
+            if (oldNode !== newNode) {
+                currentPatch.push({ type: PatchType.TEXT, index: index, content: newNode });
             }
-            
-            for (let i = 0; i < oldTree.children.length || i < newTree.children.length; i++) {
-                const childDiff = dfs(oldTree.children[i], newTree.children[i], i);
-                if (childDiff && childDiff.length > 0) {
-                    currentPatch.push({ type: PatchType['CHILDREN'], content: childDiff });
-                }
+        } else if (oldNode.tag !== newNode.tag) {
+            currentPatch.push({ type: PatchType.REPLACE, index, content: newNode });
+        } else {
+            const propsDiff = diffProps(oldNode.props, newNode.props);
+            if (Object.keys(propsDiff).length > 0) {
+                currentPatch.push({ type: PatchType.PROPS, content: propsDiff });
+            }
+
+            const maxLength = Math.max(oldNode.children.length, newNode.children.length);
+            for (let i = 0; i < maxLength; i++) {
+                dfs(oldNode.children[i], newNode.children[i], ++index);
             }
         }
 
@@ -85,20 +79,19 @@ function diff(oldTree, newTree) {
             patches[index] = currentPatch;
         }
 
-        return currentPatch;
+        return index;
     }
-
-    dfs(oldTree, newTree, 0);
-
+    index = 0
+    for (let i = 0; i < Math.max(oldTree?.children.length, newTree?.children.length); i++) {
+        index = dfs(oldTree?.children[index], newTree?.children[index], index);
+    }   
     return patches;
 }
-
 
 const diffProps = (oldProps, newProps) => {
     const diffs = {};
 
     for (const key in { ...oldProps, ...newProps }) {
-
         if (oldProps[key] !== newProps[key]) {
             diffs[key] = newProps[key];
         }
@@ -107,36 +100,33 @@ const diffProps = (oldProps, newProps) => {
     return diffs;
 }
 
-function patch(parent, patches, index = 0) {
+function patch(parent, patches, index = 0, patchesIndex = 0) {
+   
     if (!parent || !patches) {
         return;
     }
 
     const element = parent.childNodes[index];
-
-    const currentPatches = patches[index];
+    const currentPatches = patches[patchesIndex];
 
     if (currentPatches) {
         currentPatches.forEach(p => {
             switch (p.type) {
-                case PatchType["REMOVE"]:
+                case PatchType.REMOVE:
                     parent.removeChild(element);
                     break;
-                case PatchType['REPLACE']:
+                case PatchType.REPLACE:
                     parent.replaceChild(renderElement(p.content), element);
                     break;
-                case PatchType['PROPS']:
+                case PatchType.PROPS:
                     for (const key in p.content) {
                         element.setAttribute(key, p.content[key]);
                     }
                     break;
-                case PatchType['CHILDREN']:
-                    patch(element, p.content, ++index);
-                    break;
-                case PatchType['TEXT']:
+                case PatchType.TEXT:
                     element.textContent = p.content;
                     break;
-                case PatchType['ADD']:
+                case PatchType.ADD:
                     parent.appendChild(renderElement(p.content));
                     break;
                 default:
@@ -144,7 +134,11 @@ function patch(parent, patches, index = 0) {
             }
         });
     }
-}
 
+    for (let i = 0; i < element?.childNodes.length; i++) {
+        patch(element, patches, i, patchesIndex + i + 1);
+    }
+
+}
 
 export { createElement, diff, patch, renderElement };

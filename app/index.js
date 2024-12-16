@@ -7,3 +7,7 @@ helloComponent.attachTo(document.body);
 setTimeout(() => {
     helloComponent.setState({ message: 'Goodbye' });
 }, 1000);
+
+setTimeout(() => {
+    helloComponent.setState({ message: 'Hello again' });
+}, 2000);

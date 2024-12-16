@@ -20,7 +20,6 @@ class BaseComponent {
     update() {
         const newTree = this.render();
         const patches = diff(this.oldTree, newTree);
-        // console.log(patches);
         patch(this.root, patches);
         this.oldTree = newTree;
     }
