@@ -72,11 +72,12 @@ function diff(oldTree, newTree) {
             if (propsDiff && Object.keys(propsDiff).length > 0) {
                 currentPatch.push({ type: PatchType['PROPS'], content: propsDiff });
             }
-
-            const childrenDiff = dfs(oldTree.children, newTree.children, index + 1);
-
-            if (childrenDiff && childrenDiff.length > 0) {
-                currentPatch.push({ type: PatchType['CHILDREN'], content: childrenDiff });
+            
+            for (let i = 0; i < oldTree.children.length || i < newTree.children.length; i++) {
+                const childDiff = dfs(oldTree.children[i], newTree.children[i], i);
+                if (childDiff && childDiff.length > 0) {
+                    currentPatch.push({ type: PatchType['CHILDREN'], content: childDiff });
+                }
             }
         }
 
@@ -91,6 +92,7 @@ function diff(oldTree, newTree) {
 
     return patches;
 }
+
 
 const diffProps = (oldProps, newProps) => {
     const diffs = {};
@@ -115,27 +117,27 @@ function patch(parent, patches, index = 0) {
     const currentPatches = patches[index];
 
     if (currentPatches) {
-        currentPatches.forEach(patch => {
-            switch (patch.type) {
+        currentPatches.forEach(p => {
+            switch (p.type) {
                 case PatchType["REMOVE"]:
                     parent.removeChild(element);
                     break;
                 case PatchType['REPLACE']:
-                    parent.replaceChild(renderElement(patch.content), element);
+                    parent.replaceChild(renderElement(p.content), element);
                     break;
                 case PatchType['PROPS']:
-                    for (const key in patch.content) {
-                        element.setAttribute(key, patch.content[key]);
+                    for (const key in p.content) {
+                        element.setAttribute(key, p.content[key]);
                     }
                     break;
                 case PatchType['CHILDREN']:
-                    patch(element, patch.content, ++index);
+                    patch(element, p.content, ++index);
                     break;
                 case PatchType['TEXT']:
-                    element.textContent = patch.content;
+                    element.textContent = p.content;
                     break;
                 case PatchType['ADD']:
-                    parent.appendChild(renderElement(patch.content));
+                    parent.appendChild(renderElement(p.content));
                     break;
                 default:
                     break;
