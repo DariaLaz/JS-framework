@@ -1,4 +1,5 @@
 import { html, render as litRender } from 'lit-html';
+import { diff, patch, renderElement } from './virtualDom.js';
 
 class BaseComponent {
     constructor(props) {
@@ -13,16 +14,22 @@ class BaseComponent {
 
     setState(newState) {
         this.state = { ...this.state, ...newState };
-        this._litRender();
+        this.update();
     }
 
-    _litRender() {
-        litRender(this.render(), this.root);
+    update() {
+        const newTree = this.render();
+        const patches = diff(this.oldTree, newTree);
+        // console.log(patches);
+        patch(this.root, patches);
+        this.oldTree = newTree;
     }
 
     attachTo(container) {
+        this.oldTree = this.render();
+        const element = renderElement(this.oldTree);
+        this.root.appendChild(element);
         container.appendChild(this.root);
-        this._litRender();
     }
 }
 

@@ -1,14 +1,14 @@
 import BaseComponent from './baseComponent.js';
-import { html } from 'lit-html';
+import { createElement } from './virtualDom.js';
 
 class ExampleComponent extends BaseComponent {
     render() {
-        return html`
-            <div>
-                <h1>${this.props.greeting}</h1>
-                <p>${this.state.message}</p>
-            </div>
-        `;
+        return (
+            createElement('div', null,
+                createElement('h1', null, this.props.greeting),
+                createElement('p', null, this.state.message))
+            
+        );
     }
 }
 
