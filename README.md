@@ -84,5 +84,18 @@ PatchType Object: Defines different types of patches (e.g., REMOVE, REPLACE, PRO
   - Uses a depth-first traversal to apply patches to the corresponding real DOM nodes.
   - Handles different patch types (e.g., REMOVE, REPLACE, PROPS, TEXT, ADD).
 
+## Components
+#### BaseComponent for Virtual DOM Management
+_This class serves as a base for creating components that can efficiently update the DOM by minimizing direct manipulations and leveraging virtual DOM diffing and patching._
+
+The `BaseComponent` class is designed to manage the lifecycle and state of components using a virtual DOM approach.
+- `Constructor` -> Initializes the component with `props`, an empty `state`, a root `div` element, and a placeholder for the old virtual DOM tree.
+- `Render` -> Meant to be implemented by subclasses to return a virtual DOM representation of the component.
+- `setState` -> Merges new state with the existing state and triggers a re-render of the component.
+- `update` -> Generates a new virtual DOM tree, finds the differences with the old tree, and applies the necessary patches to the real DOM.
+- `attachTo` -> Renders the component and attaches it to a specified container in the real DOM.
+- `detach` -> Removes the component from the real DOM.
+
+
 
 
