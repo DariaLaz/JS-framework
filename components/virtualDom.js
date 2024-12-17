@@ -1,8 +1,8 @@
 class DOMElement {
   constructor(tag, props, children) {
     this.tag = tag;
-    this.props = props;
-    this.children = children;
+    this.props = props || {};
+    this.children = children || [];
   }
 }
 
@@ -10,17 +10,6 @@ function createElement(tag, props, ...children) {
   return new DOMElement(tag, props, children);
 }
 
-/**
- * Renders a virtual DOM element into a real DOM element.
- *
- * @param {Object} domElement - The virtual DOM element to render.
- * @returns {HTMLElement} element - The rendered HTML element.
- *
- * The virtual DOM element can be a string representing a text node or an object with the following structure:  { tag, props, children } where:
- * - tag is a string representing the HTML tag name.
- * - props is an object containing the element's attributes.
- * - children is an array of virtual DOM elements representing the element's children.
- */
 function renderElement(domElement) {
   if (typeof domElement === "string") {
     // Text node rather than an HTML element
@@ -60,81 +49,54 @@ const PatchType = {
   TEXT: "TEXT",
 };
 
-/**
- * Computes the differences (patches) between two virtual DOM trees.
- *
- * @param {Object} oldTree - The old virtual DOM tree.
- * @param {Object} newTree - The new virtual DOM tree.
- * @returns {Object} patches - An object representing the differences between the old and new trees.
- *
- * The patches object contains keys representing node indices and values as arrays of patch objects.
- * Each patch object can have the following structure:
- * - { type: PatchType.ADD, index, content } for adding a new node.
- * - { type: PatchType.REMOVE, index } for removing an existing node.
- * - { type: PatchType.TEXT, index, content } for updating text content.
- * - { type: PatchType.REPLACE, index, content } for replacing a node.
- * - { type: PatchType.PROPS, content } for updating node properties.
- */
+// Diff function to compare two VDOM trees and generate patches.
 function diff(oldTree, newTree) {
   const patches = {};
-  let index = 0;
+  let patchIndex = 1;
 
+  // Depth-first traversal to compare nodes and generate patches.
   function dfs(oldNode, newNode, index) {
-    const currentPatch = [];
+    const currentPatches = [];
 
     if (!oldNode && newNode) {
-      currentPatch.push({ type: PatchType.ADD, index, content: newNode });
+      currentPatches.push({ type: PatchType.ADD, content: newNode });
     } else if (oldNode && !newNode) {
-      currentPatch.push({ type: PatchType.REMOVE, index });
+      currentPatches.push({ type: PatchType.REMOVE });
     } else if (typeof oldNode === "string" && typeof newNode === "string") {
       if (oldNode !== newNode) {
-        currentPatch.push({
-          type: PatchType.TEXT,
-          index: index,
-          content: newNode,
-        });
+        // Text content changed
+        currentPatches.push({ type: PatchType.TEXT, content: newNode });
       }
     } else if (oldNode.tag !== newNode.tag) {
-      currentPatch.push({ type: PatchType.REPLACE, index, content: newNode });
+      // Different tags, replace the node
+      currentPatches.push({ type: PatchType.REPLACE, content: newNode });
     } else {
+      // Same tag, check for props and children
       const propsDiff = diffProps(oldNode.props, newNode.props);
       if (Object.keys(propsDiff).length > 0) {
-        currentPatch.push({ type: PatchType.PROPS, content: propsDiff });
+        currentPatches.push({ type: PatchType.PROPS, content: propsDiff });
       }
 
-      const maxLength = Math.max(
+      const maxChildrenLength = Math.max(
         oldNode.children.length,
         newNode.children.length
       );
-      for (let i = 0; i < maxLength; i++) {
-        dfs(oldNode.children[i], newNode.children[i], ++index);
+      for (let i = 0; i < maxChildrenLength; i++) {
+        patchIndex += 1;
+        dfs(oldNode.children[i], newNode.children[i], patchIndex);
       }
     }
 
-    if (currentPatch.length > 0) {
-      patches[index] = currentPatch;
+    if (currentPatches.length > 0) {
+      patches[index] = currentPatches;
     }
+  }
 
-    return index;
-  }
-  index = 0;
-  for (
-    let i = 0;
-    i < Math.max(oldTree?.children.length, newTree?.children.length);
-    i++
-  ) {
-    index = dfs(oldTree?.children[index], newTree?.children[index], index);
-  }
+  dfs(oldTree, newTree, patchIndex);
   return patches;
 }
 
-/**
- * Computes the differences between two sets of properties.
- *
- * @param {Object} oldProps - The old set of properties.
- * @param {Object} newProps - The new set of properties.
- * @returns {Object} diffs - An object representing the differences between the old and new properties.
- */
+// Compare props of two elements and return the differences.
 const diffProps = (oldProps, newProps) => {
   const diffs = {};
 
@@ -147,60 +109,63 @@ const diffProps = (oldProps, newProps) => {
   return diffs;
 };
 
-/**
- * Applies a set of patches to a real DOM element. (The differences between two virtual DOM trees)
- *
- * @param {HTMLElement} parent - The parent element to apply the patches to.
- * @param {Object} patches - The patches to apply.
- * @param {number} index - The index of the current node.
- * @param {number} patchesIndex - The index of the current patch.
- *
- * The patches object is the result of the diff function and contains keys representing node indices and values as arrays of patch objects.
- * Each patch object can have the following structure:
- * - { type: PatchType.ADD, index, content } for adding a new node.
- * - { type: PatchType.REMOVE, index } for removing an existing node.
- * - { type: PatchType.TEXT, index, content } for updating text content.
- * - { type: PatchType.REPLACE, index, content } for replacing a node.
- * - { type: PatchType.PROPS, content } for updating node properties.
- *
- **/
-function patch(parent, patches, index = 0, patchesIndex = 0) {
-  if (!parent || !patches) {
-    return;
-  }
+// Apply patches to the Real DOM.
+function patch(parent, patches) {
+  let currentIndex = 0;
 
-  const element = parent.childNodes[index];
-  const currentPatches = patches[patchesIndex];
+  console.log("----Patches:", patches, "Parent:", parent);
 
-  if (currentPatches) {
-    currentPatches.forEach((p) => {
-      switch (p.type) {
-        case PatchType.REMOVE:
-          parent.removeChild(element);
-          break;
-        case PatchType.REPLACE:
-          parent.replaceChild(renderElement(p.content), element);
-          break;
-        case PatchType.PROPS:
-          for (const key in p.content) {
-            element.setAttribute(key, p.content[key]);
-          }
-          break;
-        case PatchType.TEXT:
-          element.textContent = p.content;
-          break;
-        case PatchType.ADD:
-          parent.appendChild(renderElement(p.content));
-          break;
-        default:
-          break;
+  // Depth-first traversal to apply patches.
+  function dfs(node) {
+    console.log("Node:", node, "Current Index:", currentIndex);
+    const currentPatches = patches[currentIndex];
+
+    if (currentPatches) {
+      currentPatches.forEach((patch) => {
+        switch (patch.type) {
+          case PatchType.REMOVE:
+            node.parentNode.removeChild(node);
+            break;
+          case PatchType.REPLACE:
+            node.parentNode.replaceChild(renderElement(patch.content), node);
+            break;
+          case PatchType.PROPS:
+            for (const key in patch.content) {
+              if (patch.content[key] === null) {
+                node.removeAttribute(key);
+              } else {
+                node.setAttribute(key, patch.content[key]);
+              }
+            }
+            break;
+          case PatchType.TEXT:
+            node.textContent = patch.content;
+            break;
+          case PatchType.ADD:
+            node.appendChild(renderElement(patch.content));
+            break;
+          default:
+            break;
+        }
+      });
+    }
+
+    // If the node was removed or replaced, do not traverse its children
+    const isNodeRemovedOrReplaced =
+      currentPatches &&
+      currentPatches.some(
+        (p) => p.type === PatchType.REMOVE || p.type === PatchType.REPLACE
+      );
+    if (!isNodeRemovedOrReplaced) {
+      const children = node.childNodes;
+      for (let i = 0; i < children.length; i++) {
+        currentIndex++;
+        dfs(children[i]);
       }
-    });
+    }
   }
 
-  for (let i = 0; i < element?.childNodes.length; i++) {
-    patch(element, patches, i, patchesIndex + i + 1);
-  }
+  dfs(parent);
 }
 
 export { createElement, diff, patch, renderElement };
