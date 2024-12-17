@@ -50,6 +50,7 @@ const PatchType = {
 };
 
 // Diff function to compare two VDOM trees and generate patches.
+// Inspiration: https://medium.com/@ruchivora16/react-how-react-works-under-the-hood-9b621ee69fb5
 function diff(oldTree, newTree) {
   const patches = {};
   let patchIndex = 1;
