@@ -1,4 +1,4 @@
-import { diff, patch, renderElement } from "./virtualDom.js";
+import { createRealDOMElement, diff, patch } from "./virtualDom.js";
 
 class BaseComponent {
   constructor(props = {}) {
@@ -29,7 +29,7 @@ class BaseComponent {
   // Attaches the component to a container in the Real DOM.
   attachTo(container) {
     this.oldTree = this.render();
-    const element = renderElement(this.oldTree);
+    const element = createRealDOMElement(this.oldTree);
     this.root.appendChild(element);
     container.appendChild(this.root);
   }

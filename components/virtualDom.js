@@ -1,3 +1,5 @@
+import { createRealDOMElement } from "../virtualDom/createRealDOMElement";
+
 class DOMElement {
   constructor(tag, props, children) {
     this.tag = tag;
@@ -8,36 +10,6 @@ class DOMElement {
 
 function createElement(tag, props, ...children) {
   return new DOMElement(tag, props, children);
-}
-
-function renderElement(domElement) {
-  if (typeof domElement === "string") {
-    // Text node rather than an HTML element
-    return document.createTextNode(domElement);
-  }
-
-  const element = document.createElement(domElement.tag);
-
-  if (domElement.props) {
-    Object.keys(domElement.props).forEach((key) => {
-      if (key.startsWith("on")) {
-        element.addEventListener(
-          key.slice(2).toLowerCase(),
-          domElement.props[key]
-        );
-      } else {
-        element.setAttribute(key, domElement.props[key]);
-      }
-    });
-  }
-
-  if (domElement.children) {
-    domElement.children.forEach((child) => {
-      element.appendChild(renderElement(child));
-    });
-  }
-
-  return element;
 }
 
 const PatchType = {
@@ -128,7 +100,10 @@ function patch(parent, patches) {
             node.parentNode.removeChild(node);
             break;
           case PatchType.REPLACE:
-            node.parentNode.replaceChild(renderElement(patch.content), node);
+            node.parentNode.replaceChild(
+              createRealDOMElement(patch.content),
+              node
+            );
             break;
           case PatchType.PROPS:
             for (const key in patch.content) {
@@ -143,7 +118,7 @@ function patch(parent, patches) {
             node.textContent = patch.content;
             break;
           case PatchType.ADD:
-            node.appendChild(renderElement(patch.content));
+            node.appendChild(createRealDOMElement(patch.content));
             break;
           default:
             break;
@@ -169,4 +144,4 @@ function patch(parent, patches) {
   dfs(parent);
 }
 
-export { createElement, diff, patch, renderElement };
+export { createElement, diff, patch, createRealDOMElement };
