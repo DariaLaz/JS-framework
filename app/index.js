@@ -1,22 +1,25 @@
-import ExampleComponent from '../components/exampleComponent.js'; 
+import ExampleComponent from "../components/exampleComponent.js";
 
-const helloComponent = new ExampleComponent({ greeting: 'Hello, World!', message: 'Welcome' });
+const helloComponent = new ExampleComponent({
+  greeting: "Hello, World!",
+  message: "Welcome",
+});
 helloComponent.attachTo(document.body);
 
 setTimeout(() => {
-    helloComponent.setState({ message: 'Goodbye' });
+  helloComponent.setState({ message: "Goodbye" });
 }, 1000);
 
 setTimeout(() => {
-    helloComponent.setState({ message: 'Hello again' });
+  helloComponent.setState({ message: "Hello again" });
 }, 2000);
 
 setTimeout(() => {
-    helloComponent.setState({ showButton: false });
+  helloComponent.setState({ showButton: false });
 }, 3000);
 
 setTimeout(() => {
-    helloComponent.setState({ showButton: true });
+  helloComponent.setState({ showButton: true });
 }, 4000);
 
 // setTimeout(() => {
