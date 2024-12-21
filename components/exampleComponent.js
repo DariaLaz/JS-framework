@@ -1,5 +1,5 @@
+import { createVirtualElement } from "../virtualDom/VirtualDOMElement.js";
 import BaseComponent from "./baseComponent.js";
-import { createElement } from "./virtualDom.js";
 
 class ExampleComponent extends BaseComponent {
   constructor(props) {
@@ -15,19 +15,34 @@ class ExampleComponent extends BaseComponent {
   };
 
   render() {
-    return createElement(
-      "div",
-      { class: "example-component" },
-      createElement("h1", null, this.props.greeting),
-      createElement("p", null, this.state.message),
-      this.state.showButton
-        ? createElement(
-            "button",
-            { onClick: this.toggleButton },
-            "Toggle Button"
-          )
-        : createElement("h1", null, "Button is hidden")
-    );
+    return createVirtualElement({
+      tag: "div",
+      props: { class: "example-component" },
+      children: [
+        createVirtualElement({
+          tag: "h1",
+          props: null,
+          children: [this.props.greeting],
+        }),
+        createVirtualElement({
+          tag: "p",
+          props: null,
+          children: [this.state.message],
+        }),
+
+        this.state.showButton
+          ? createVirtualElement({
+              tag: "button",
+              props: { onClick: this.toggleButton },
+              children: ["Toggle Button"],
+            })
+          : createVirtualElement({
+              tag: "h1",
+              props: null,
+              children: ["Button is hidden"],
+            }),
+      ],
+    });
   }
 }
 

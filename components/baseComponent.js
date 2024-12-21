@@ -1,4 +1,5 @@
-import { createRealDOMElement, diff, patch } from "./virtualDom.js";
+import { createRealDOMElement } from "../virtualDom/createRealDOMElement";
+import { patchDiff } from "../virtualDom/patchDiff";
 
 class BaseComponent {
   constructor(props = {}) {
@@ -21,8 +22,7 @@ class BaseComponent {
 
   update() {
     const newTree = this.render();
-    const patches = diff(this.oldTree, newTree);
-    patch(this.root, patches);
+    patchDiff(this.oldTree, newTree, this.root);
     this.oldTree = newTree;
   }
 
