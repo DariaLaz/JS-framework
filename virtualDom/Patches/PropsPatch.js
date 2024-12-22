@@ -20,7 +20,7 @@ export class PropsPatch {
    *
    * @param {Record<string,any>} oldProps
    * @param {Record<string,any>} newProps
-   * @returns PropsPatch
+   * @returns {PropsPatch | undefined}
    */
   static create(oldProps, newProps) {
     const { added, same, removed } = arrayDiff(
