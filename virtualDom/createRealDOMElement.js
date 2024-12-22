@@ -16,7 +16,6 @@ export function createRealDOMElement(virtualDomElement) {
   if (virtualDomElement.props) {
     for (const key in virtualDomElement.props) {
       if (isDOMEvent(key)) {
-        // TODO remove event listeners
         element.addEventListener(key, virtualDomElement.props[key]);
       } else {
         element.setAttribute(key, virtualDomElement.props[key]);

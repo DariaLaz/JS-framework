@@ -1,19 +1,6 @@
 import { createRealDOMElement } from "./createRealDOMElement";
-import { PatchType } from "./constants/PatchType";
-
-// Compare props of two elements and return the differences.
-const diffProps = (oldProps, newProps) => {
-  const diffs = {};
-
-  // TODO change to get the removed props and then get the new added props
-  for (const key in { ...oldProps, ...newProps }) {
-    if (oldProps[key] !== newProps[key]) {
-      diffs[key] = newProps[key];
-    }
-  }
-
-  return diffs;
-};
+import { PatchType } from "./Patches/PatchType";
+import { PropsPatch } from "./Patches/PropsPatch";
 
 // Diff function to compare two VDOM trees and generate patches.
 // Inspiration: https://medium.com/@ruchivora16/react-how-react-works-under-the-hood-9b621ee69fb5
@@ -47,9 +34,9 @@ function getPatches(currentTree, newTree) {
       currentPatches.push({ type: PatchType.REPLACE, content: newNode });
     } else {
       // Same tag, check for props and children
-      const propsDiff = diffProps(currentNode.props, newNode.props);
-      if (Object.keys(propsDiff).length > 0) {
-        currentPatches.push({ type: PatchType.PROPS, content: propsDiff });
+      const propsPatch = PropsPatch.create(currentNode.props, newNode.props);
+      if (propsPatch) {
+        currentPatches.push(propsPatch);
       }
 
       const maxChildrenLength = Math.max(
@@ -94,14 +81,7 @@ function patch(parent, patches) {
             break;
           }
           case PatchType.PROPS: {
-            for (const key in patch.content) {
-              // TODO would change to traverse to diff arrays there is a todo above
-              if (patch.content[key] === null) {
-                node.removeAttribute(key);
-              } else {
-                node.setAttribute(key, patch.content[key]);
-              }
-            }
+            patch.apply(node);
             break;
           }
           case PatchType.TEXT: {

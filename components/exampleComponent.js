@@ -7,11 +7,21 @@ class ExampleComponent extends BaseComponent {
     this.state = {
       message: props.message || "Default Message",
       showButton: true,
+      buttonColor: "red",
     };
   }
 
   toggleButton = () => {
     this.setState({ showButton: !this.state.showButton });
+  };
+
+  changeButtonColor = () => {
+    if (this.state.buttonColor === "blue") {
+      this.setState({ buttonColor: "red" });
+      return;
+    }
+
+    this.setState({ buttonColor: "blue" });
   };
 
   render() {
@@ -41,6 +51,25 @@ class ExampleComponent extends BaseComponent {
               props: null,
               children: ["Button is hidden"],
             }),
+
+        // TODO: remove this and click on the button below and the code crashes
+        createVirtualElement({
+          tag: "br",
+          props: null,
+          children: null,
+        }),
+
+        createVirtualElement({
+          tag: "button",
+          props: {
+            style: `color: ${this.state.buttonColor}`,
+            click:
+              this.state.buttonColor === "red"
+                ? this.changeButtonColor
+                : undefined,
+          },
+          children: ["Change color"],
+        }),
       ],
     });
   }
