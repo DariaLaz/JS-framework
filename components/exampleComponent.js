@@ -53,11 +53,11 @@ class ExampleComponent extends BaseComponent {
             }),
 
         // TODO: remove this and click on the button below and the code crashes
-        createVirtualElement({
-          tag: "br",
-          props: null,
-          children: null,
-        }),
+        // createVirtualElement({
+        //   tag: "br",
+        //   props: null,
+        //   children: null,
+        // }),
 
         createVirtualElement({
           tag: "button",

@@ -73,6 +73,8 @@ export class PropsPatch {
    * @param {HTMLElement} node
    */
   apply(node) {
+    // TODO this should be text
+    console.log(node, this);
     for (const { key } of this.toBeRemovedAttributes) {
       node.removeAttribute(key);
     }
