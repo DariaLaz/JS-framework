@@ -1,3 +1,4 @@
+import { isDOMEvent } from "./constants/EventListeners";
 import { VirtualDOMElement } from "./VirtualDOMElement";
 
 /**
@@ -13,17 +14,14 @@ export function createRealDOMElement(virtualDomElement) {
   const element = document.createElement(virtualDomElement.tag);
 
   if (virtualDomElement.props) {
-    Object.keys(virtualDomElement.props).forEach((key) => {
-      // TODO: add event listener array and refacotr
-      if (key.startsWith("on")) {
-        element.addEventListener(
-          key.slice(2).toLowerCase(),
-          virtualDomElement.props[key]
-        );
+    for (const key in virtualDomElement.props) {
+      if (isDOMEvent(key)) {
+        // TODO remove event listeners
+        element.addEventListener(key, virtualDomElement.props[key]);
       } else {
         element.setAttribute(key, virtualDomElement.props[key]);
       }
-    });
+    }
   }
 
   virtualDomElement.children?.forEach((child) => {

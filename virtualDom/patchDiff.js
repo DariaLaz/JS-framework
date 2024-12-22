@@ -1,5 +1,5 @@
 import { createRealDOMElement } from "./createRealDOMElement";
-import { PatchType } from "./PatchType";
+import { PatchType } from "./constants/PatchType";
 
 // Compare props of two elements and return the differences.
 const diffProps = (oldProps, newProps) => {

@@ -33,7 +33,7 @@ class ExampleComponent extends BaseComponent {
         this.state.showButton
           ? createVirtualElement({
               tag: "button",
-              props: { onClick: this.toggleButton },
+              props: { click: this.toggleButton },
               children: ["Toggle Button"],
             })
           : createVirtualElement({
@@ -47,3 +47,6 @@ class ExampleComponent extends BaseComponent {
 }
 
 export default ExampleComponent;
+
+// TODO there is a bug where you can click on the hidden button
+// TODO there is a bug where you can not click on the text of the button
