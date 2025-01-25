@@ -1,5 +1,6 @@
 import { createVirtualElement } from "../virtualDom/VirtualDOMElement.js";
 import BaseComponent from "./baseComponent.js";
+import { ExampleComponent1 } from "./exampleComponent1.js";
 
 class ExampleComponent extends BaseComponent {
   constructor(props) {
@@ -30,6 +31,20 @@ class ExampleComponent extends BaseComponent {
       props: { class: "example-component" },
       children: [
         createVirtualElement({
+          tag: ExampleComponent1,
+          props: {
+            greeting: "Hello World",
+            message: "This is a message from the parent component",
+          },
+          children: [
+            createVirtualElement({
+              tag: "p",
+              props: null,
+              children: ["This is a child component"],
+            }),
+          ],
+        }),
+        createVirtualElement({
           tag: "h1",
           props: null,
           children: [this.props.greeting],
@@ -59,17 +74,17 @@ class ExampleComponent extends BaseComponent {
         //   children: null,
         // }),
 
-        createVirtualElement({
-          tag: "button",
-          props: {
-            style: `color: ${this.state.buttonColor}`,
-            click:
-              this.state.buttonColor === "red"
-                ? this.changeButtonColor
-                : undefined,
-          },
-          children: ["Change color"],
-        }),
+        // createVirtualElement({
+        //   tag: "button",
+        //   props: {
+        //     style: `color: ${this.state.buttonColor}`,
+        //     click:
+        //       this.state.buttonColor === "red"
+        //         ? this.changeButtonColor
+        //         : undefined,
+        //   },
+        //   children: ["Change color"],
+        // }),
       ],
     });
   }

@@ -1,34 +1,24 @@
+import { createVirtualElement } from "../virtualDom/VirtualDOMElement.js";
 import BaseComponent from "./baseComponent.js";
-import { createElement } from "../virtualDom/createRealDOMElement.js";
 
-class ExampleComponent1 extends BaseComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      message: props.message || "Default Message",
-      showButton: true,
-    };
-  }
-
-  toggleButton = () => {
-    this.setState({ showButton: !this.state.showButton });
-  };
-
+export class ExampleComponent1 extends BaseComponent {
   render() {
-    return createElement(
-      "div",
-      { class: "example-component" },
-      createElement("h1", null, this.props.greeting),
-      createElement("p", null, this.state.message),
-      this.state.showButton
-        ? createElement(
-            "button",
-            { onClick: this.toggleButton },
-            "Toggle Button"
-          )
-        : createElement("h1", null, "Button is hidden")
-    );
+    return createVirtualElement({
+      tag: "div",
+      props: { class: "example-component" },
+      children: [
+        createVirtualElement({
+          tag: "h1",
+          props: null,
+          children: [this.props.greeting],
+        }),
+        createVirtualElement({
+          tag: "p",
+          props: null,
+          children: [this.props.message],
+        }),
+        ...this.props.children,
+      ],
+    });
   }
 }
-
-export default ExampleComponent1;
