@@ -56,7 +56,7 @@ class ExampleComponent extends BaseComponent {
               key: i,
               tag: "p",
               props: null,
-              children: ["This is a child component"],
+              children: ["This is a child component " + i],
             })
           ),
         createElement({

@@ -186,6 +186,6 @@ function patch(root, patch) {
  * @param {DOMElement} root
  */
 export function patchDiff(oldTree, newTree, root) {
-  const patches = getPatches(oldTree, newTree);
+  const patches = getNodePatches(oldTree, newTree);
   patch(root, patches);
 }

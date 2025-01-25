@@ -43,34 +43,34 @@ export class VirtualDOMElement {
   generateChildren(key) {
     let index = 0;
 
-    return (
-      this.children
-        // If it is plain text, we don't need to build a virtual dom element for it.
-        .filter((child) => typeof child !== "string")
-        .map((child) => {
-          if (!child) {
-            // Increment the index even if the child is null
-            // because we want to guarantee that there will be a place for this one if it becomes an element.
-            index++;
-            return null;
-          }
+    return this.children
+      .map((child) => {
+        if (typeof child === "string") {
+          return child;
+        }
 
-          if (child.key) {
-            // If the child has a key, we don't need to increment the index.
-            // This is done to ensure that the keys are the same for elements outside of arrays
-            // where the elements are dynamic and we need to give them there own unique key.
-
-            // TODO Add a warning for ^this^
-            return child.generateVirtualTree({ parentKey: key });
-          }
-
-          const parentData = { parentKey: key, index };
+        if (!child) {
+          // Increment the index even if the child is null
+          // because we want to guarantee that there will be a place for this one if it becomes an element.
           index++;
+          return null;
+        }
 
-          return child.generateVirtualTree(parentData);
-        })
-        .filter(Boolean)
-    );
+        if (child.key) {
+          // If the child has a key, we don't need to increment the index.
+          // This is done to ensure that the keys are the same for elements outside of arrays
+          // where the elements are dynamic and we need to give them there own unique key.
+
+          // TODO Add a warning for ^this^
+          return child.generateVirtualTree({ parentKey: key });
+        }
+
+        const parentData = { parentKey: key, index };
+        index++;
+
+        return child.generateVirtualTree(parentData);
+      })
+      .filter(Boolean);
   }
 
   /**

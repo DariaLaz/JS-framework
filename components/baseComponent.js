@@ -29,26 +29,30 @@ class BaseComponent {
     return root?.generateVirtualTree();
   }
 
+  // TODO Custom Components pass root to children somehow
   update() {
+    // TODO
     // Първия път в attachTO се суздава дървото което ще пази стейтовете по нататък.
     // Тук създаваме ново дърво и го сравняваме със стартоот, като идеята е че ще модифицираме стартоо за да не загубим стейта на компонента.
     // Пачваме си дома какот си трябва и тн.
 
     const newVirtualTree = this.generateVirtualDomTree();
-    patchDiff(this.virtualDomTree, newVirtualTree, this.realDomTree);
+    patchDiff(this.virtualDomTree, newVirtualTree, this.root);
     this.virtualDomTree = newVirtualTree;
   }
 
   // Attaches the component to a container in the Real DOM.
-  attachTo(container) {
+  attachTo(root) {
+    this.root = root;
     this.virtualDomTree = this.generateVirtualDomTree();
-    this.realDomTree = generateRealDOMElement(this.virtualDomTree);
 
-    if (!this.realDomTree) {
+    const realDomTree = generateRealDOMElement(this.virtualDomTree);
+
+    if (!realDomTree) {
       return;
     }
 
-    container.appendChild(this.realDomTree);
+    this.root.appendChild(realDomTree);
   }
 
   // Detaches the component from the Real DOM.
