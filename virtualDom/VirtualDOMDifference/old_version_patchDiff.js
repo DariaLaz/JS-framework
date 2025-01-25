@@ -96,6 +96,5 @@ function patch(parent, patches) {
  */
 export function patchDiff(oldTree, newTree, root) {
   const patches = getPatches(oldTree, newTree);
-  // TODO pass old tree to patch and index from zero in the path
   patch(root, patches);
 }

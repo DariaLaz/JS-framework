@@ -86,29 +86,27 @@ class ExampleComponent extends BaseComponent {
             }),
 
         // TODO: remove this and click on the button below and the code crashes
-        // createElement({
-        //   tag: "br",
-        //   props: null,
-        //   children: null,
-        // }),
+        createElement({
+          tag: "br",
+          props: null,
+          children: null,
+        }),
 
-        // createElement({
-        //   tag: "button",
-        //   props: {
-        //     style: `color: ${this.state.buttonColor}`,
-        //     click:
-        //       this.state.buttonColor === "red"
-        //         ? this.changeButtonColor
-        //         : undefined,
-        //   },
-        //   children: ["Change color"],
-        // }),
+        // TODO Daria this crashes when clicked
+        createElement({
+          tag: "button",
+          props: {
+            style: `color: ${this.state.buttonColor}`,
+            click:
+              this.state.buttonColor === "red"
+                ? this.changeButtonColor
+                : undefined,
+          },
+          children: ["Change color"],
+        }),
       ],
     });
   }
 }
 
 export default ExampleComponent;
-
-// TODO there is a bug where you can click on the hidden button
-// TODO there is a bug where you can not click on the text of the button

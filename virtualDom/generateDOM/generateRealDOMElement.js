@@ -87,8 +87,6 @@ export function generateRealDOMElement(virtualDomElement) {
   }
 }
 
-// TODO: key optimizations
-// TODO null rendering
 // TODO custom element render
 // TODO patch when the element is custom
 // TODO lifecycle methods
