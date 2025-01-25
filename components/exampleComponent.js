@@ -85,14 +85,13 @@ class ExampleComponent extends BaseComponent {
               children: ["Button is hidden"],
             }),
 
-        // TODO: remove this and click on the button below and the code crashes
+        // TODO Daria: remove this and click on the button below and the code crashes
         createElement({
           tag: "br",
           props: null,
           children: null,
         }),
 
-        // TODO Daria this crashes when clicked
         createElement({
           tag: "button",
           props: {

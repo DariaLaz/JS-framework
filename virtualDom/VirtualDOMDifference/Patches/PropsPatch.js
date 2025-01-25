@@ -4,6 +4,7 @@ import { isDOMEvent } from "../../constants/EventListeners";
 
 export class PropsPatch {
   constructor(
+    id,
     toBeAddedAttributes,
     toBeAddedEventListeners,
     toBeRemovedAttributes,
@@ -13,6 +14,7 @@ export class PropsPatch {
     this.toBeAddedEventListeners = toBeAddedEventListeners;
     this.toBeRemovedAttributes = toBeRemovedAttributes;
     this.toBeRemovedEventListeners = toBeRemovedEventListeners;
+    this.id = id;
   }
 
   /**
@@ -62,6 +64,7 @@ export class PropsPatch {
       }));
 
     return new PropsPatch(
+      id,
       toBeAddedAttributes,
       toBeAddedEventListeners,
       toBeRemovedAttributes,
