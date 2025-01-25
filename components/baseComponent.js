@@ -37,6 +37,8 @@ class BaseComponent {
     // Пачваме си дома какот си трябва и тн.
 
     const newVirtualTree = this.generateVirtualDomTree();
+
+    console.log(this.virtualDomTree, newVirtualTree);
     applyVirtualDOMDifferences(this.virtualDomTree, newVirtualTree, this.root);
     this.virtualDomTree = newVirtualTree;
   }

@@ -49,7 +49,7 @@ class ExampleComponent extends BaseComponent {
           props: null,
           children: [this.props.greeting],
         }),
-        ...Array(this.state.showButton ? 10 : 5)
+        ...Array(this.state.showButton ? 2 : 1)
           .keys()
           .map((i) =>
             createElement({

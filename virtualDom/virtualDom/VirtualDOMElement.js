@@ -1,6 +1,7 @@
 import { createVirtualTreeNode } from "./VirtualTreeNode";
 
 const CHILD_SECRET_KEY = Symbol("CHILD_SECRET_KEY");
+const ROOT_SECRET_KEY = Symbol("ROOT_SECRET_KEY");
 
 export class VirtualDOMElement {
   /**
@@ -23,7 +24,7 @@ export class VirtualDOMElement {
    */
   generateKey(parentData) {
     if (!parentData) {
-      return this.key ?? Math.random().toString(36).substring(7);
+      return ROOT_SECRET_KEY.toString();
     }
 
     if (!this.key) {

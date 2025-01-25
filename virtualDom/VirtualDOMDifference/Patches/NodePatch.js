@@ -1,3 +1,4 @@
+import { selectElement } from "../../../utils/selectElement";
 import { BasePatch } from "./BasePatch";
 
 export class NodePatch {
@@ -27,14 +28,15 @@ export class NodePatch {
    */
   apply(root) {
     const domElement =
-      this.elementPatch?.apply(root) ?? selectElement(root, this.key);
+      this.elementPatch?.apply(root) ??
+      (this.key ? selectElement(root, this.key) : undefined);
 
     if (!domElement || !this.childrenPatches) {
       return;
     }
 
     this.childrenPatches.forEach((childPatch) => {
-      patch(domElement, childPatch);
+      childPatch.apply(domElement);
     });
   }
 }

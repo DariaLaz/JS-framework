@@ -3,7 +3,6 @@ import { TextPatch } from "./Patches/TextPatch";
 import { CreatePatch } from "./Patches/CreatePatch";
 import { RemovePatch } from "./Patches/RemovePatch";
 import { ReplacePatch } from "./Patches/ReplacePatch";
-import { BasePatch } from "./Patches/BasePatch";
 import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
 import { NodePatch } from "./Patches/NodePatch";
 
@@ -34,7 +33,9 @@ function getRemovedNodes(oldNode, newNode) {
           child.type === newChild.type &&
           (child.type === "text"
             ? child.text === newChild.text
-            : child.element.key === newChild.element.key)
+            : child.element.key === newChild.element.key &&
+              // TODO Custom Components add logic here
+              child.element.tag === newChild.element.tag)
       )
   );
 
@@ -68,8 +69,8 @@ function getChildrenPatches(oldNode, newNode) {
   const newChildren = newNode.children.map(addTypeToElement);
 
   let indexInOldNode = 0;
-  const newTreePatches = newChildren.children.forEach((child, index) => {
-    if (indexInOldNode > restOldChildren.length) {
+  const newTreePatches = newChildren.map((child, index) => {
+    if (indexInOldNode > restOldChildren.length - 1) {
       return NodePatch.create({
         elementPatch:
           child.type === "text"
@@ -82,13 +83,12 @@ function getChildrenPatches(oldNode, newNode) {
 
     if (child.type === "text" && oldChild.type === "text") {
       indexInOldNode++;
-      return NodePatch.create({
-        // TODO ?? maybe add types to this shit no need to map them everywhere
-        elementPatch:
-          child.text !== oldChild.text
-            ? TextPatch.create(child.text)
-            : undefined,
-      });
+      return child.text !== oldChild.text
+        ? NodePatch.create({
+            // TODO ?? maybe add types to this shit no need to map them everywhere
+            elementPatch: TextPatch.create(child.text),
+          })
+        : undefined;
     }
 
     if (
@@ -96,10 +96,10 @@ function getChildrenPatches(oldNode, newNode) {
       oldChild.type === "element" &&
       child.element.key === oldChild.element.key &&
       // TODO Custom Components add logic here
-      child.element.tag !== oldChild.element.tag
+      child.element.tag === oldChild.element.tag
     ) {
       indexInOldNode++;
-      return getNodePatches(child.element, oldChild.element);
+      return generateNodePatch(child.element, oldChild.element);
     }
 
     return NodePatch.create({
@@ -107,7 +107,7 @@ function getChildrenPatches(oldNode, newNode) {
     });
   });
 
-  return [...removedPatches, ...newTreePatches];
+  return [...removedPatches, ...newTreePatches].filter(Boolean);
 }
 
 /**
@@ -138,6 +138,12 @@ export function generateNodePatch(oldNode, newNode) {
     oldNode.props,
     newNode.props
   );
+
+  const childrenPatches = getChildrenPatches(oldNode, newNode);
+
+  if (!propsPatch && !childrenPatches.length) {
+    return;
+  }
 
   return NodePatch.create({
     key: oldNode.key,

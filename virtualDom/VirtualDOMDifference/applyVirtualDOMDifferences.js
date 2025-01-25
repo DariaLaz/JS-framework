@@ -10,5 +10,7 @@ import { generateNodePatch } from "./generateNodePatch";
 export function applyVirtualDOMDifferences(oldTree, newTree, root) {
   const patch = generateNodePatch(oldTree, newTree);
 
-  patch.apply(root);
+  console.log(patch);
+
+  patch?.apply(root);
 }
