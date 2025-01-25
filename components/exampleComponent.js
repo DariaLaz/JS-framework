@@ -1,4 +1,4 @@
-import { createElement } from "../virtualDom/VirtualDOMElement.js";
+import { createElement } from "../virtualDom/virtualDom/VirtualDOMElement.js";
 import BaseComponent from "./baseComponent.js";
 import { ExampleComponent1 } from "./exampleComponent1.js";
 
@@ -49,6 +49,16 @@ class ExampleComponent extends BaseComponent {
           props: null,
           children: [this.props.greeting],
         }),
+        ...Array(this.state.showButton ? 10 : 5)
+          .keys()
+          .map((i) =>
+            createElement({
+              key: i,
+              tag: "p",
+              props: null,
+              children: ["This is a child component"],
+            })
+          ),
         createElement({
           tag: "p",
           props: null,

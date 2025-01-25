@@ -1,5 +1,5 @@
 import { isDOMEvent } from "../constants/EventListeners";
-import { VirtualDOMElement } from "../VirtualDOMElement";
+import { VirtualDOMElement } from "../virtualDom/VirtualDOMElement";
 
 /**
  * @param {VirtualDOMElement} virtualDomElement

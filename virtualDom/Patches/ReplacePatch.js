@@ -1,5 +1,5 @@
 import { generateRealDOMElement } from "../generateDOM/generateRealDOMElement";
-import { VirtualDOMElement } from "../VirtualDOMElement";
+import { VirtualDOMElement } from "../virtualDom/VirtualDOMElement";
 import { PatchType } from "./PatchType";
 
 export class ReplacePatch {

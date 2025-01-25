@@ -9,7 +9,9 @@ class BaseComponent {
     this.realDomTree = null; // To store the previous Real DOM tree
   }
 
-  // Return an instance of DOMElement or a string for text nodes.
+  /**
+   * @returns {VirtualDOMElement | null}
+   */
   render() {
     return null; // To be implemented by subclasses
   }
@@ -21,7 +23,17 @@ class BaseComponent {
     this.update();
   }
 
+  generateVirtualDomTree() {
+    const root = this.render();
+
+    return root?.generateVirtualTree();
+  }
+
   update() {
+    // Първия път в attachTO се суздава дървото което ще пази стейтовете по нататък.
+    // Тук създаваме ново дърво и го сравняваме със стартоот, като идеята е че ще модифицираме стартоо за да не загубим стейта на компонента.
+    // Пачваме си дома какот си трябва и тн.
+
     const newTree = this.render();
     patchDiff(this.virtualDomTree, newTree, this.realDomTree);
     this.virtualDomTree = newTree;
@@ -50,3 +62,4 @@ class BaseComponent {
 export default BaseComponent;
 
 // TODO handle render of components inside components
+// TODO maybe call recursively  render

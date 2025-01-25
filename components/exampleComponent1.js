@@ -1,4 +1,4 @@
-import { createElement } from "../virtualDom/VirtualDOMElement.js";
+import { createElement } from "../virtualDom/virtualDom/VirtualDOMElement.js";
 import BaseComponent from "./baseComponent.js";
 
 export class ExampleComponent1 extends BaseComponent {
