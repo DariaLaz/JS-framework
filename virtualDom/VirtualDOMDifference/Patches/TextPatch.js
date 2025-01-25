@@ -1,8 +1,4 @@
-import { PatchType } from "./PatchType";
-
 export class TextPatch {
-  type = PatchType.TEXT;
-
   constructor(newText) {
     this.newText = newText;
   }

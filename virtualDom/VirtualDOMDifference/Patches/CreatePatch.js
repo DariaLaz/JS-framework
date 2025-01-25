@@ -1,10 +1,7 @@
-import { generateRealDOMElement } from "../generateDOM/generateRealDOMElement";
-import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
-import { PatchType } from "./PatchType";
+import { generateRealDOMElement } from "../../generateDOM/generateRealDOMElement";
+import { VirtualTreeNode } from "../../virtualDom/VirtualTreeNode";
 
 export class CreatePatch {
-  type = PatchType.CREATE;
-
   constructor(virtualNode, index) {
     this.virtualNode = virtualNode;
     this.index = index;

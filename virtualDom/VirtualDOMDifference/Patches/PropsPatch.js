@@ -1,9 +1,8 @@
-import { arrayDiff } from "../../utils/arrayDiff";
-import { isDOMEvent } from "../constants/EventListeners";
-import { PatchType } from "./PatchType";
+import { arrayDiff } from "../../../utils/arrayDiff";
+import { selectElement } from "../../../utils/selectElement";
+import { isDOMEvent } from "../../constants/EventListeners";
 
 export class PropsPatch {
-  type = PatchType.PROPS;
   constructor(
     toBeAddedAttributes,
     toBeAddedEventListeners,
@@ -76,10 +75,7 @@ export class PropsPatch {
    * @returns {HTMLElement}
    */
   apply(root) {
-    // TODO this should be text ????????????????????????/
-    console.log(node, this);
-
-    const node = root.querySelector(`[id="${this.id}"]`);
+    const node = selectElement(root, this.id);
 
     for (const { key } of this.toBeRemovedAttributes) {
       node.removeAttribute(key);

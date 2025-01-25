@@ -1,8 +1,6 @@
-import { PatchType } from "./PatchType";
+import { selectElement } from "../../../utils/selectElement";
 
 export class RemovePatch {
-  type = PatchType.REMOVE;
-
   constructor(id) {
     this.id = id;
   }
@@ -20,7 +18,7 @@ export class RemovePatch {
    * @param {HTMLElement} root
    */
   apply(root) {
-    const node = root.querySelector(`[id="${this.id}"]`);
+    const node = selectElement(root, this.id);
     root.removeChild(node);
 
     return null;

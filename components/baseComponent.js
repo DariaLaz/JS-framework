@@ -1,5 +1,5 @@
 import { generateRealDOMElement } from "../virtualDom/generateDOM/generateRealDOMElement";
-import { patchDiff } from "../virtualDom/patchDiff";
+import { applyVirtualDOMDifferences } from "../virtualDom/VirtualDOMDifference/applyVirtualDOMDifferences";
 
 class BaseComponent {
   constructor(props = {}) {
@@ -37,7 +37,7 @@ class BaseComponent {
     // Пачваме си дома какот си трябва и тн.
 
     const newVirtualTree = this.generateVirtualDomTree();
-    patchDiff(this.virtualDomTree, newVirtualTree, this.root);
+    applyVirtualDOMDifferences(this.virtualDomTree, newVirtualTree, this.root);
     this.virtualDomTree = newVirtualTree;
   }
 

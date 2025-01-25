@@ -4,15 +4,28 @@ import { CreatePatch } from "./Patches/CreatePatch";
 import { RemovePatch } from "./Patches/RemovePatch";
 import { ReplacePatch } from "./Patches/ReplacePatch";
 import { BasePatch } from "./Patches/BasePatch";
-import { VirtualTreeNode } from "./virtualDom/VirtualTreeNode";
+import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
+import { NodePatch } from "./Patches/NodePatch";
 
+/**
+ * @param {VirtualTreeNode} child
+ * @returns {{type: string, text: string} | {type: string, element: VirtualTreeNode}}
+ */
+function addTypeToElement(child) {
+  return typeof child === "string"
+    ? { type: "text", text: child }
+    : { type: "element", element: child };
+}
+
+/**
+ *
+ * @param {VirtualTreeNode} oldNode
+ * @param {VirtualTreeNode} newNode
+ * @returns {{removedPatches: NodePatch[], restOldChildren: ({type: string, text: string} | {type: string, element: VirtualTreeNode})[]}}
+ */
 function getRemovedNodes(oldNode, newNode) {
-  const mapToType = (child) =>
-    typeof child === "string"
-      ? { type: "text", text: child }
-      : { type: "element", element: child.key };
-  const oldChildren = oldNode.children.map(mapToType);
-  const newChildren = newNode.children.map(mapToType);
+  const oldChildren = oldNode.children.map(addTypeToElement);
+  const newChildren = newNode.children.map(addTypeToElement);
 
   const removed = oldChildren.filter(
     (child) =>
@@ -27,17 +40,14 @@ function getRemovedNodes(oldNode, newNode) {
 
   const removedPatches = removed.map((child) => {
     if (child.type === "text") {
-      return {
-        key: undefined,
+      return NodePatch.create({
         elementPatch: TextPatch.create(undefined),
-        childrenPatches: [],
-      };
+      });
     }
-    return {
-      key: child.element.key,
+
+    return NodePatch.create({
       elementPatch: RemovePatch.create(child.element.key),
-      childrenPatches: [],
-    };
+    });
   });
 
   const restOldChildren = oldChildren.filter(
@@ -50,46 +60,35 @@ function getRemovedNodes(oldNode, newNode) {
 /**
  * @param {VirtualTreeNode} oldNode
  * @param {VirtualTreeNode} newNode
- * @returns {BasePatch[]} Wrong return type
+ * @returns {NodePatch[]}
  */
 function getChildrenPatches(oldNode, newNode) {
   const { removedPatches, restOldChildren } = getRemovedNodes(oldNode, newNode);
 
-  const mapToType = (child) =>
-    typeof child === "string"
-      ? { type: "text", text: child }
-      : { type: "element", element: child.key };
-  const newChildren = newNode.children.map(mapToType);
+  const newChildren = newNode.children.map(addTypeToElement);
 
   let indexInOldNode = 0;
   const newTreePatches = newChildren.children.forEach((child, index) => {
     if (indexInOldNode > restOldChildren.length) {
-      return child.type === "text"
-        ? {
-            key: undefined,
-            elementPatch: TextPatch.create(child.text),
-            childrenPatches: [],
-          }
-        : {
-            key: child.element.key,
-            elementPatch: CreatePatch.create(child.element, index),
-            childrenPatches: [],
-          };
+      return NodePatch.create({
+        elementPatch:
+          child.type === "text"
+            ? TextPatch.create(child.text)
+            : CreatePatch.create(child.element, index),
+      });
     }
 
     const oldChild = restOldChildren[indexInOldNode];
 
     if (child.type === "text" && oldChild.type === "text") {
       indexInOldNode++;
-      return {
+      return NodePatch.create({
         // TODO ?? maybe add types to this shit no need to map them everywhere
-        key: undefined,
         elementPatch:
-          child.text === oldChild.text
-            ? undefined
-            : TextPatch.create(child.text),
-        childrenPatches: [],
-      };
+          child.text !== oldChild.text
+            ? TextPatch.create(child.text)
+            : undefined,
+      });
     }
 
     if (
@@ -103,30 +102,22 @@ function getChildrenPatches(oldNode, newNode) {
       return getNodePatches(child.element, oldChild.element);
     }
 
-    return {
-      key: child.element.key,
+    return NodePatch.create({
       elementPatch: CreatePatch.create(child.element, index),
-      childrenPatches: [],
-    };
+    });
   });
 
   return [...removedPatches, ...newTreePatches];
 }
 
 /**
- * @typedef {
- *  key: string,
- *  elementPatch: BasePatch,
- *  childrenPatches: NodePatch[]
- * } NodePatch
- *
  * Diff function to compare two VDOM trees and generate patches.
  * Inspiration: https://medium.com/@ruchivora16/react-how-react-works-under-the-hood-9b621ee69fb5
  * @param {VirtualTreeNode} oldNode
  * @param {VirtualTreeNode} newNode
  * @returns {NodePatch}
  */
-function getNodePatches(oldNode, newNode) {
+export function generateNodePatch(oldNode, newNode) {
   // Key/Tag check and patch generation
   // Mostly for the root node
   if (
@@ -134,10 +125,9 @@ function getNodePatches(oldNode, newNode) {
     // TODO Custom Components add logic here
     oldNode.tag !== newNode.tag
   ) {
-    return {
-      elementPatch: ReplacePatch.create(oldNode, newNode),
-      childrenPatches: [],
-    };
+    return NodePatch.create({
+      elementPatch: ReplacePatch.create(oldNode.key, newNode),
+    });
   }
 
   // TODO Add shallowEqual for memoised components
@@ -149,43 +139,9 @@ function getNodePatches(oldNode, newNode) {
     newNode.props
   );
 
-  return {
+  return NodePatch.create({
     key: oldNode.key,
     elementPatch: propsPatch,
     childrenPatches: getChildrenPatches(oldNode, newNode),
-  };
-}
-
-// TODO Move
-function getElementFromKey(root, id) {
-  return root.querySelector(`[id="${id}"]`);
-}
-
-/**
- * Apply patches to the Real DOM.
- * @param {DOMElement} parent
- * @param {BasePatch[]} patches TODO wrong type
- */
-function patch(root, patch) {
-  const { elementPatch, childrenPatches } = patch;
-
-  const domElement =
-    elementPatch?.apply(root) ?? getElementFromKey(root, patch.key);
-
-  if (childrenPatches?.length) {
-    childrenPatches.forEach((childPatch) => {
-      patch(domElement, childPatch);
-    });
-  }
-}
-
-/**
- *
- * @param {VirtualTreeNode} oldTree
- * @param {VirtualTreeNode} newTree
- * @param {DOMElement} root
- */
-export function patchDiff(oldTree, newTree, root) {
-  const patches = getNodePatches(oldTree, newTree);
-  patch(root, patches);
+  });
 }
