@@ -99,7 +99,7 @@ function getChildrenPatches(oldNode, newNode) {
       child.element.tag === oldChild.element.tag
     ) {
       indexInOldNode++;
-      return generateNodePatch(child.element, oldChild.element);
+      return generateNodePatch(oldChild.element, child.element);
     }
 
     return NodePatch.create({
@@ -132,15 +132,16 @@ export function generateNodePatch(oldNode, newNode) {
 
   // TODO Add shallowEqual for memoised components
   // if (shallowEqual(oldNode.props, newNode.props)) {
-
   const propsPatch = PropsPatch.create(
     newNode.key,
     oldNode.props,
     newNode.props
   );
 
-  const childrenPatches = getChildrenPatches(oldNode, newNode);
+  console.log("generateNodePatch -> newNode", newNode);
 
+  const childrenPatches = getChildrenPatches(oldNode, newNode);
+  console.log("generateNodePatch -> childrenPatches", childrenPatches);
   if (!propsPatch && !childrenPatches.length) {
     return;
   }
@@ -148,6 +149,6 @@ export function generateNodePatch(oldNode, newNode) {
   return NodePatch.create({
     key: oldNode.key,
     elementPatch: propsPatch,
-    childrenPatches: getChildrenPatches(oldNode, newNode),
+    childrenPatches,
   });
 }
