@@ -1,18 +1,18 @@
-import { createVirtualElement } from "../virtualDom/VirtualDOMElement.js";
+import { createElement } from "../virtualDom/VirtualDOMElement.js";
 import BaseComponent from "./baseComponent.js";
 
 export class ExampleComponent1 extends BaseComponent {
   render() {
-    return createVirtualElement({
+    return createElement({
       tag: "div",
       props: { class: "example-component" },
       children: [
-        createVirtualElement({
+        createElement({
           tag: "h1",
           props: null,
           children: [this.props.greeting],
         }),
-        createVirtualElement({
+        createElement({
           tag: "p",
           props: null,
           children: [this.props.message],

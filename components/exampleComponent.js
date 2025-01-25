@@ -1,4 +1,4 @@
-import { createVirtualElement } from "../virtualDom/VirtualDOMElement.js";
+import { createElement } from "../virtualDom/VirtualDOMElement.js";
 import BaseComponent from "./baseComponent.js";
 import { ExampleComponent1 } from "./exampleComponent1.js";
 
@@ -26,55 +26,63 @@ class ExampleComponent extends BaseComponent {
   };
 
   render() {
-    return createVirtualElement({
+    return createElement({
       tag: "div",
       props: { class: "example-component" },
       children: [
-        createVirtualElement({
-          tag: ExampleComponent1,
-          props: {
-            greeting: "Hello World",
-            message: "This is a message from the parent component",
-          },
-          children: [
-            createVirtualElement({
-              tag: "p",
-              props: null,
-              children: ["This is a child component"],
-            }),
-          ],
-        }),
-        createVirtualElement({
+        // createElement({
+        //   tag: ExampleComponent1,
+        //   props: {
+        //     greeting: "Hello World",
+        //     message: "This is a message from the parent component",
+        //   },
+        //   children: [
+        //     createElement({
+        //       tag: "p",
+        //       props: null,
+        //       children: ["This is a child component"],
+        //     }),
+        //   ],
+        // }),
+        createElement({
           tag: "h1",
           props: null,
           children: [this.props.greeting],
         }),
-        createVirtualElement({
+        createElement({
           tag: "p",
           props: null,
           children: [this.state.message],
         }),
 
-        this.state.showButton
-          ? createVirtualElement({
+        !this.state.showButton
+          ? createElement({
               tag: "button",
               props: { click: this.toggleButton },
-              children: ["Toggle Button"],
+              children: ["Show Button"],
             })
-          : createVirtualElement({
+          : null,
+
+        this.state.showButton
+          ? createElement({
+              tag: "button",
+              props: { click: this.toggleButton },
+              children: ["Hide Button"],
+            })
+          : createElement({
               tag: "h1",
               props: null,
               children: ["Button is hidden"],
             }),
 
         // TODO: remove this and click on the button below and the code crashes
-        // createVirtualElement({
+        // createElement({
         //   tag: "br",
         //   props: null,
         //   children: null,
         // }),
 
-        // createVirtualElement({
+        // createElement({
         //   tag: "button",
         //   props: {
         //     style: `color: ${this.state.buttonColor}`,

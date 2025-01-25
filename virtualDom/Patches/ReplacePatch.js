@@ -1,4 +1,4 @@
-import { createRealDOMElement } from "../createRealDOMElement";
+import { generateRealDOMElement } from "../generateDOM/generateRealDOMElement";
 import { VirtualDOMElement } from "../VirtualDOMElement";
 import { PatchType } from "./PatchType";
 
@@ -23,6 +23,12 @@ export class ReplacePatch {
    * @param {HTMLElement} node
    */
   apply(node) {
-    node.parentNode.replaceChild(createRealDOMElement(this.virtualNode), node);
+    const element = generateRealDOMElement(this.virtualNode);
+
+    if (!element) {
+      return;
+    }
+
+    node.parentNode.replaceChild(element, node);
   }
 }

@@ -1,4 +1,4 @@
-import { createRealDOMElement } from "../createRealDOMElement";
+import { generateRealDOMElement } from "../generateDOM/generateRealDOMElement";
 import { PatchType } from "./PatchType";
 
 export class CreatePatch {
@@ -22,6 +22,12 @@ export class CreatePatch {
    * @param {HTMLElement} node
    */
   apply(node) {
-    node.appendChild(createRealDOMElement(this.virtualNode));
+    const element = generateRealDOMElement(this.virtualNode);
+
+    if (!element) {
+      return;
+    }
+
+    node.appendChild(element);
   }
 }

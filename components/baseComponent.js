@@ -1,4 +1,4 @@
-import { createRealDOMElement } from "../virtualDom/createRealDOMElement";
+import { generateRealDOMElement } from "../virtualDom/generateDOM/generateRealDOMElement";
 import { patchDiff } from "../virtualDom/patchDiff";
 
 class BaseComponent {
@@ -30,7 +30,12 @@ class BaseComponent {
   // Attaches the component to a container in the Real DOM.
   attachTo(container) {
     this.virtualDomTree = this.render();
-    this.realDomTree = createRealDOMElement(this.virtualDomTree);
+    this.realDomTree = generateRealDOMElement(this.virtualDomTree);
+
+    if (!this.realDomTree) {
+      return;
+    }
+
     container.appendChild(this.realDomTree);
   }
 

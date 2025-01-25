@@ -11,6 +11,6 @@ export class VirtualDOMElement {
  * @param {{tag: string, props: Record<string, any>, children:VirtualDOMElement[] }} param0
  * @returns {VirtualDOMElement}
  */
-export function createVirtualElement({ tag, props, children }) {
+export function createElement({ tag, props, children }) {
   return new VirtualDOMElement(tag, props, children);
 }

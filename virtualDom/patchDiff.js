@@ -15,8 +15,7 @@ import { BasePatch } from "./Patches/BasePatch";
  */
 function getPatches(currentTree, newTree) {
   const patches = {};
-  // TODO why from one?
-  let patchIndex = 1;
+  let patchIndex = 0;
 
   // Depth-first traversal to compare nodes and generate patches.
   function dfs(currentNode, newNode, index) {
