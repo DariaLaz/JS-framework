@@ -34,14 +34,14 @@ class BaseComponent {
     // Тук създаваме ново дърво и го сравняваме със стартоот, като идеята е че ще модифицираме стартоо за да не загубим стейта на компонента.
     // Пачваме си дома какот си трябва и тн.
 
-    const newTree = this.render();
-    patchDiff(this.virtualDomTree, newTree, this.realDomTree);
-    this.virtualDomTree = newTree;
+    const newVirtualTree = this.generateVirtualDomTree();
+    patchDiff(this.virtualDomTree, newVirtualTree, this.realDomTree);
+    this.virtualDomTree = newVirtualTree;
   }
 
   // Attaches the component to a container in the Real DOM.
   attachTo(container) {
-    this.virtualDomTree = this.render();
+    this.virtualDomTree = this.generateVirtualDomTree();
     this.realDomTree = generateRealDOMElement(this.virtualDomTree);
 
     if (!this.realDomTree) {

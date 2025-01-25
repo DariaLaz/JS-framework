@@ -1,8 +1,8 @@
 import { isDOMEvent } from "../constants/EventListeners";
-import { VirtualDOMElement } from "../virtualDom/VirtualDOMElement";
+import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
 
 /**
- * @param {VirtualDOMElement} virtualDomElement
+ * @param {VirtualTreeNode} virtualDomElement
  * @returns {HTMLElement | Text}
  */
 function generateComponent(virtualDomElement) {
@@ -26,31 +26,33 @@ function generateComponent(virtualDomElement) {
         element.appendChild(child);
       });
 
+    element.id = virtualDomElement.key;
+
     return element;
   }
 
-  /**
-   * @param {VirtualDOMElement} virtualDomElement
-   * @returns {HTMLElement | Text}
-   */
-  function createCustomElement() {
-    const element = new virtualDomElement.tag({
-      ...virtualDomElement.props,
-      children: virtualDomElement.children,
-    });
+  // /**
+  //  * @param {VirtualTreeNode} virtualDomElement
+  //  * @returns {HTMLElement | Text}
+  //  */
+  // function createCustomElement() {
+  //   const element = new virtualDomElement.tag({
+  //     ...virtualDomElement.props,
+  //     children: virtualDomElement.children,
+  //   });
 
-    const virtualDomSubTree = element.render();
+  //   const virtualDomSubTree = element.render();
 
-    return generateRealDOMElement(virtualDomSubTree);
-  }
+  //   return generateRealDOMElement(virtualDomSubTree);
+  // }
 
   switch (typeof virtualDomElement.tag) {
     case "string": {
       return createHTMLElement(virtualDomElement);
     }
-    case "function": {
-      return createCustomElement(virtualDomElement);
-    }
+    // case "function": {
+    //   return createCustomElement(virtualDomElement);
+    // }
     default: {
       throw new Error(
         "Invalid tag type " + JSON.stringify(virtualDomElement, null, 2)
@@ -60,7 +62,7 @@ function generateComponent(virtualDomElement) {
 }
 
 /**
- * @param {VirtualDOMElement} virtualDomElement
+ * @param {VirtualTreeNode} virtualDomElement
  * @returns {HTMLElement | Text | null}
  */
 export function generateRealDOMElement(virtualDomElement) {
@@ -87,5 +89,6 @@ export function generateRealDOMElement(virtualDomElement) {
 
 // TODO: key optimizations
 // TODO null rendering
+// TODO custom element render
 // TODO patch when the element is custom
 // TODO lifecycle methods

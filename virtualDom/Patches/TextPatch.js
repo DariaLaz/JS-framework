@@ -9,23 +9,20 @@ export class TextPatch {
 
   /**
    *
-   * @param {string} oldText
    * @param {string} newText
-   * @returns {TextPatch | undefined}
+   * @returns {TextPatch}
    */
-  static create(oldText, newText) {
-    if (oldText === newText) {
-      return;
-    }
-
+  static create(newText) {
     return new TextPatch(newText);
   }
 
   /**
    *
-   * @param {HTMLElement} node
+   * @param {HTMLElement} root
    */
-  apply(node) {
-    node.textContent = this.newText;
+  apply(root) {
+    root.textContent = this.newText;
+
+    return null;
   }
 }

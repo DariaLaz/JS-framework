@@ -1,34 +1,41 @@
 import { generateRealDOMElement } from "../generateDOM/generateRealDOMElement";
-import { VirtualDOMElement } from "../virtualDom/VirtualDOMElement";
+import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
 import { PatchType } from "./PatchType";
 
 export class ReplacePatch {
   type = PatchType.REPLACE;
 
-  constructor(virtualNode) {
-    this.virtualNode = virtualNode;
+  constructor(oldNode, newNode) {
+    this.oldNode = oldNode;
+    this.newNode = newNode;
   }
 
   /**
    *
-   * @param {VirtualDOMElement} virtualNode
+   * @param {VirtualTreeNode} oldNode
+   * @param {VirtualTreeNode} newNode
    * @returns {ReplacePatch}
    */
-  static create(virtualNode) {
-    return new ReplacePatch(virtualNode);
+  static create(oldNode, newNode) {
+    return new ReplacePatch(oldNode, newNode);
   }
 
   /**
    *
    * @param {HTMLElement} node
+   * @returns {HTMLElement}
    */
-  apply(node) {
-    const element = generateRealDOMElement(this.virtualNode);
+  apply(root) {
+    const element = generateRealDOMElement(this.newNode);
+
+    const oldElement = root.querySelector(`[id="${this.oldNode.key}"]`);
 
     if (!element) {
       return;
     }
 
-    node.parentNode.replaceChild(element, node);
+    root.replaceChild(element, oldElement);
+
+    return element;
   }
 }

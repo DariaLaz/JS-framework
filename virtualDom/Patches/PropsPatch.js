@@ -17,12 +17,14 @@ export class PropsPatch {
   }
 
   /**
-   *
+   * @param {string} id
    * @param {Record<string,any>} oldProps
    * @param {Record<string,any>} newProps
    * @returns {PropsPatch | undefined}
    */
-  static create(oldProps, newProps) {
+  static create(id, oldProps, newProps) {
+    this.id = id;
+
     const { added, same, removed } = arrayDiff(
       Object.keys(oldProps),
       Object.keys(newProps)
@@ -71,10 +73,14 @@ export class PropsPatch {
   /**
    * Apply the patch to the real DOM node.
    * @param {HTMLElement} node
+   * @returns {HTMLElement}
    */
-  apply(node) {
-    // TODO this should be text
+  apply(root) {
+    // TODO this should be text ????????????????????????/
     console.log(node, this);
+
+    const node = root.querySelector(`[id="${this.id}"]`);
+
     for (const { key } of this.toBeRemovedAttributes) {
       node.removeAttribute(key);
     }
@@ -90,5 +96,7 @@ export class PropsPatch {
     for (const { key, value } of this.toBeAddedEventListeners) {
       node.addEventListener(key, value);
     }
+
+    return node;
   }
 }

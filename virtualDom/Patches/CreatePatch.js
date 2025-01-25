@@ -1,33 +1,41 @@
 import { generateRealDOMElement } from "../generateDOM/generateRealDOMElement";
+import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
 import { PatchType } from "./PatchType";
 
 export class CreatePatch {
   type = PatchType.CREATE;
 
-  constructor(virtualNode) {
+  constructor(virtualNode, index) {
     this.virtualNode = virtualNode;
+    this.index = index;
   }
 
   /**
    *
-   * @param {VirtualDOMElement} virtualNode
+   * @param {VirtualTreeNode} virtualNode
    * @returns {CreatePatch}
    */
-  static create(virtualNode) {
-    return new CreatePatch(virtualNode);
+  static create(virtualNode, index) {
+    return new CreatePatch(virtualNode, index);
   }
 
   /**
-   *
-   * @param {HTMLElement} node
+   * @param {HTMLElement} root
+   * @returns {HTMLElement}
    */
-  apply(node) {
+  apply(root) {
     const element = generateRealDOMElement(this.virtualNode);
 
     if (!element) {
       return;
     }
 
-    node.appendChild(element);
+    if (this.index < root.childNodes.length) {
+      root.insertBefore(element, root.childNodes[this.index]);
+    } else {
+      root.appendChild(element);
+    }
+
+    return element;
   }
 }
