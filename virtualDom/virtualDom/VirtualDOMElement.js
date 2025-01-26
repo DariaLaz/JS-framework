@@ -1,11 +1,8 @@
 import { createVirtualTreeNode } from "./VirtualTreeNode";
-
-const CHILD_SECRET_KEY = Symbol("CHILD_SECRET_KEY");
-const ROOT_SECRET_KEY = Symbol("ROOT_SECRET_KEY");
-
+import { generateVirtualKey } from "./VirtualKey";
 export class VirtualDOMElement {
   /**
-   * @param {string | undefined} key
+   * @param {VirtualKey | undefined} key
    * @param {string} tag
    * @param {Record<string, any>} props
    * @param {VirtualDOMElement[]} children
@@ -19,26 +16,7 @@ export class VirtualDOMElement {
   }
 
   /**
-   * @param {{parentKey:string, index: number| undefined} | undefined} parentData
-   * @returns {string}
-   */
-  generateKey(parentData) {
-    if (!parentData) {
-      return ROOT_SECRET_KEY.toString();
-    }
-
-    if (!this.key) {
-      // TODO this with the symbol is almost cool needs improving. Maybe create an object for the key?
-      return `${parentData.parentKey}.${CHILD_SECRET_KEY.toString()}.${
-        parentData.index
-      }`;
-    }
-
-    return `${parentData.parentKey}.${this.key}`;
-  }
-
-  /**
-   * @param {string} key
+   * @param {VirtualKey} key
    * @returns {VirtualDOMElement[]}
    */
   generateChildren(key) {
@@ -79,7 +57,7 @@ export class VirtualDOMElement {
    * @returns {VirtualDOMElement}
    */
   generateVirtualTree(parentData) {
-    const key = this.generateKey(parentData);
+    const key = generateVirtualKey(parentData, this.key);
 
     const children = this.generateChildren(key);
 
