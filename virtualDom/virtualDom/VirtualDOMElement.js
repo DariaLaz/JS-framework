@@ -3,7 +3,7 @@ import { generateVirtualKey } from "./VirtualKey";
 export class VirtualDOMElement {
   /**
    * @param {VirtualKey | undefined} key
-   * @param {string} tag
+   * @param {string | function} tag
    * @param {Record<string, any>} props
    * @param {VirtualDOMElement[]} children
    *
@@ -26,6 +26,17 @@ export class VirtualDOMElement {
       .map((child) => {
         if (typeof child === "string") {
           return child;
+        }
+
+        if (typeof child === "function") {
+          const componentInstance = new this.tag({
+            ...this.props,
+            children,
+          });
+    
+          const virtualDomSubTree = componentInstance.render();
+    
+          return virtualDomSubTree.generateVirtualTree(parentData);
         }
 
         if (!child) {
@@ -73,7 +84,7 @@ export class VirtualDOMElement {
 
 /**
  *
- * @param {{key:string | undefined,  tag: string, props: Record<string, any>, children:VirtualDOMElement[] }} param0
+ * @param {{key:string | undefined,  tag: string | function, props: Record<string, any>, children:VirtualDOMElement[] }} param0
  * @returns {VirtualDOMElement}
  */
 export function createElement({ key, tag, props, children }) {

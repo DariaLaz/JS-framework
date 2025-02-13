@@ -31,28 +31,27 @@ function generateComponent(virtualDomElement) {
     return element;
   }
 
-  // /**
-  //  * @param {VirtualTreeNode} virtualDomElement
-  //  * @returns {HTMLElement | Text}
-  //  */
-  // function createCustomElement() {
-  //   const element = new virtualDomElement.tag({
-  //     ...virtualDomElement.props,
-  //     children: virtualDomElement.children,
-  //   });
+  /**
+   * @returns {HTMLElement | Text}
+   */
+  function createCustomElement() {
+    const componentInstance = new virtualDomElement.tag({
+      ...virtualDomElement.props,
+      children: virtualDomElement.children,
+    });
 
-  //   const virtualDomSubTree = element.render();
+    const virtualDomSubTree = componentInstance.render();
 
-  //   return generateRealDOMElement(virtualDomSubTree);
-  // }
+    return generateRealDOMElement(virtualDomSubTree);
+  }
 
   switch (typeof virtualDomElement.tag) {
     case "string": {
       return createHTMLElement(virtualDomElement);
     }
-    // case "function": {
-    //   return createCustomElement(virtualDomElement);
-    // }
+    case "function": {
+      return createCustomElement(virtualDomElement);
+    }
     default: {
       throw new Error(
         "Invalid tag type " + JSON.stringify(virtualDomElement, null, 2)
@@ -87,6 +86,5 @@ export function generateRealDOMElement(virtualDomElement) {
   }
 }
 
-// TODO custom element render
 // TODO patch when the element is custom
 // TODO lifecycle methods

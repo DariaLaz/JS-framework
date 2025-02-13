@@ -30,20 +30,20 @@ class ExampleComponent extends BaseComponent {
       tag: "div",
       props: { class: "example-component" },
       children: [
-        // createElement({
-        //   tag: ExampleComponent1,
-        //   props: {
-        //     greeting: "Hello World",
-        //     message: "This is a message from the parent component",
-        //   },
-        //   children: [
-        //     createElement({
-        //       tag: "p",
-        //       props: null,
-        //       children: ["This is a child component"],
-        //     }),
-        //   ],
-        // }),
+        createElement({
+          tag: ExampleComponent1,
+          props: {
+            greeting: "Hello World",
+            message: "This is a message from the parent component",
+          },
+          children: [
+            createElement({
+              tag: "p",
+              props: null,
+              children: ["This is a child component"],
+            }),
+          ],
+        }),
         createElement({
           tag: "h1",
           props: null,

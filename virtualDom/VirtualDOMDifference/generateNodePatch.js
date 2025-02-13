@@ -138,10 +138,7 @@ export function generateNodePatch(oldNode, newNode) {
     newNode.props
   );
 
-  console.log("generateNodePatch -> newNode", newNode);
-
   const childrenPatches = getChildrenPatches(oldNode, newNode);
-  console.log("generateNodePatch -> childrenPatches", childrenPatches);
   if (!propsPatch && !childrenPatches.length) {
     return;
   }
