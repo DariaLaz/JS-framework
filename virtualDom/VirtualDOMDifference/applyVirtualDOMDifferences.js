@@ -1,3 +1,4 @@
+import hookManager from "../../hooks/hookManager";
 import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
 import { generateNodePatch } from "./generateNodePatch";
 
@@ -13,4 +14,5 @@ export function applyVirtualDOMDifferences(oldTree, newTree, root) {
   console.log(patch);
 
   patch?.apply(root);
+  hookManager.runHooks();
 }

@@ -1,5 +1,5 @@
 import ExampleComponent from "../components/exampleComponent.js";
-import useEffect  from "../hooks/useEffect.js";
+import { useEffect } from "../hooks/useEffect.js";
 
 const helloComponent = new ExampleComponent({
   greeting: "Hello, World!",
@@ -7,13 +7,7 @@ const helloComponent = new ExampleComponent({
   buttonColor: "red",
 });
 
-const helloComponent1 = new ExampleComponent({
-  greeting: "sedefs",
-  message: "esdafc",
-  buttonColor: "red",
-});
 helloComponent.attachTo(document.body);
-helloComponent1.attachTo(document.body);
 
 useEffect(() => {
   console.log("Effect called");
