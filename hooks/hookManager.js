@@ -14,7 +14,7 @@ class hookManager {
 
   /**
    * Adds a new hook to the hook manager
-   * @param {Effect} hook
+   * @param {Effect | State} hook
    */
   addHook(hook) {
     this.hooks.push(hook);
