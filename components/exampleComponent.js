@@ -8,21 +8,13 @@ class ExampleComponent extends BaseComponent {
     this.state = {
       message: props.message || "Default Message",
       showButton: true,
-      buttonColor: "red",
+      buttonColor: props.buttonColor,
     };
+
   }
 
   toggleButton = () => {
     this.setState({ showButton: !this.state.showButton });
-  };
-
-  changeButtonColor = () => {
-    if (this.state.buttonColor === "blue") {
-      this.setState({ buttonColor: "red" });
-      return;
-    }
-
-    this.setState({ buttonColor: "blue" });
   };
 
   render() {
@@ -89,10 +81,11 @@ class ExampleComponent extends BaseComponent {
           tag: "button",
           props: {
             style: `color: ${this.state.buttonColor}`,
-            click:
-              this.state.buttonColor === "red"
-                ? this.changeButtonColor
-                : undefined,
+            click: () => {
+              this.setState({
+                buttonColor: this.state.buttonColor === "blue" ? "red" : "blue",
+              });
+            },
           },
           children: ["Change color"],
         }),
