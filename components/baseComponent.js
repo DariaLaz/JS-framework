@@ -4,7 +4,7 @@ import { shallowEqual } from "../utils/shallowEqual";
 
 class BaseComponent {
   /**
-   * Constructs a new BaseComponent instance, initializing props, state, and lifecycle hooks.
+   * Constructs a new BaseComponent instance, initializing props and state.
    * @constructor
    * @param {Object} [props={}] - The initial properties for the component.
    */
@@ -13,8 +13,6 @@ class BaseComponent {
     this.state = {};
     this.virtualDomTree = null; // To store the previous VDOM tree
     this.realDomTree = null; // To store the previous Real DOM tree
-    this.hooks = [];
-    this.hookIndex = 0;
   }
 
   /**
@@ -31,6 +29,7 @@ class BaseComponent {
    * @param {Object} partialState - The new partial state to merge into the component’s current state.
    */
   setState(partialState) {
+    console.log(this.state)
     const newState = { ...this.state, ...partialState };
 
     if (shallowEqual(this.state, newState)) {
@@ -38,6 +37,7 @@ class BaseComponent {
     }
 
     this.state = newState;
+    console.log(newState)
     this.update();
   }
 
@@ -65,7 +65,6 @@ class BaseComponent {
 
     applyVirtualDOMDifferences(this.virtualDomTree, newVirtualTree, this.root);
     this.virtualDomTree = newVirtualTree;
-    this.runEffects();
   }
 
   /**
@@ -83,52 +82,15 @@ class BaseComponent {
     }
 
     this.root.appendChild(realDomTree);
-    this.runEffects();
   }
 
   /**
-   * Detaches the component from the DOM, cleaning up associated effects.
+   * Detaches the component from the DOM.
    */
   detach() {
     if (this.realDomTree.parentNode) {
       this.realDomTree.parentNode.removeChild(this.realDomTree);
     }
-    this.cleanupEffects();
-  }
-
-  /**
-   *
-   * @param {() => void} effect
-   * @param {() => void | null} cleanup
-   */
-  addEffect(effect, cleanup) {
-    this.hooks[this.hookIndex] = { effect, cleanup };
-    this.hookIndex++;
-  }
-
-  /**
-   * Invokes the cleanup functions for all hooks, then re-invokes their effects where applicable.
-   */
-  runEffects() {
-    this.hookIndex = 0;
-    this.cleanupEffects();
-    
-    this.hooks.forEach((hook) => {
-      if (hook.effect) {
-        hook.cleanup = hook.effect();
-      }
-    });
-  }
-
-  /**
-   * Cleans up resources or side effects for all hooks that define a cleanup function.
-   */
-  cleanupEffects() {
-    this.hooks.forEach((hook) => {
-      if (hook.cleanup) {
-        hook.cleanup();
-      }
-    });
   }
 }
 
