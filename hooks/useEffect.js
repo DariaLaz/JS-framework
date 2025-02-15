@@ -1,13 +1,13 @@
 import hookManager from "./hookManager";
 import { shallowEqual } from "../utils/shallowEqual";
-import deepClone from "../utils/deepClone";
+import { deepClone } from "../utils/deepClone";
 
 /**
  * Represents a single effect hook.
  * @class
  * @param {() => void} callback
  * @param {Array} dependencies
- * 
+ *
  */
 class Effect {
   constructor(callback, dependencies) {
@@ -21,7 +21,6 @@ class Effect {
 
   /**
    * Compares the current dependencies to the old dependencies. If they are different, the effect is run.
-   * 
    * @returns {void}
    */
   use() {
@@ -44,7 +43,7 @@ class Effect {
  * @param {() => void} callback
  * @param {Array} dependencies
  * @returns {Effect}
- */ 
+ */
 export function useEffect(callback, dependencies) {
   return new Effect(callback, dependencies);
 }
