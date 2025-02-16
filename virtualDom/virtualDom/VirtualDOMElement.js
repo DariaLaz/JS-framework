@@ -1,8 +1,12 @@
 import { createVirtualTreeNode } from "./VirtualTreeNode";
-import { generateVirtualKey } from "./VirtualKey";
+
+// TODO: Create object for the key
+const ROOT_SECRET_KEY = "ROOT_SECRET_KEY";
+const CHILD_SECRET_KEY = "CHILD_SECRET_KEY";
+
 export class VirtualDOMElement {
   /**
-   * @param {VirtualKey | undefined} key
+   * @param {string | undefined} key
    * @param {string | function} tag
    * @param {Record<string, any>} props
    * @param {VirtualDOMElement[]} children
@@ -16,7 +20,23 @@ export class VirtualDOMElement {
   }
 
   /**
-   * @param {VirtualKey} key
+   * @param {{parentKey:string, index: number| undefined} | undefined} parentData
+   * @returns {string}
+   */
+  generateKey(parentData) {
+    if (!parentData) {
+      return ROOT_SECRET_KEY;
+    }
+
+    if (!this.key) {
+      return `${parentData.parentKey}.${CHILD_SECRET_KEY}.${parentData.index}`;
+    }
+
+    return `${parentData.parentKey}.${this.key}`;
+  }
+
+  /**
+   * @param {string} key
    * @returns {VirtualDOMElement[]}
    */
   generateChildren(key) {
@@ -33,9 +53,9 @@ export class VirtualDOMElement {
             ...this.props,
             children,
           });
-    
+
           const virtualDomSubTree = componentInstance.render();
-    
+
           return virtualDomSubTree.generateVirtualTree(parentData);
         }
 
@@ -68,7 +88,7 @@ export class VirtualDOMElement {
    * @returns {VirtualDOMElement}
    */
   generateVirtualTree(parentData) {
-    const key = generateVirtualKey(parentData, this.key);
+    const key = this.generateKey(parentData);
 
     const children = this.generateChildren(key);
 

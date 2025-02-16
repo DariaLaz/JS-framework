@@ -10,7 +10,6 @@ class ExampleComponent extends BaseComponent {
       showButton: true,
       buttonColor: props.buttonColor,
     };
-
   }
 
   toggleButton = () => {
@@ -25,7 +24,7 @@ class ExampleComponent extends BaseComponent {
         createElement({
           tag: ExampleComponent1,
           props: {
-            greeting: "Hello World",
+            greeting: "Second Component",
             message: "This is a message from the parent component",
           },
           children: [

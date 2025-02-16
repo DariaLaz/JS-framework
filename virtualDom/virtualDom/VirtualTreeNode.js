@@ -1,6 +1,6 @@
 export class VirtualTreeNode {
   /**
-   * @param {VirtualKey | undefined} key
+   * @param {string | undefined} key
    * @param {string} tag
    * @param {Record<string, any>} props
    * @param {VirtualTreeNode[]} children
@@ -16,7 +16,7 @@ export class VirtualTreeNode {
 
 /**
  *
- * @param {{key:VirtualKey,  tag: string, props: Record<string, any>, children:VirtualDOMElement[] }} param0
+ * @param {{key: string,  tag: string, props: Record<string, any>, children:VirtualDOMElement[] }} param0
  * @returns {VirtualDOMElement}
  */
 export function createVirtualTreeNode({ key, tag, props, children }) {
