@@ -33,7 +33,7 @@ export class ExampleComponent1 extends BaseComponent {
               tag: "p",
               props: null,
               children: ["This is a second child component " + i],
-            })
+            }),
           ),
         createElement({
           tag: "p",

@@ -33,4 +33,4 @@ class hookManager {
   }
 }
 
-module.exports = new hookManager();
+export default new hookManager();

@@ -1,4 +1,5 @@
 import { createVirtualTreeNode } from "./VirtualTreeNode";
+import { TEXT_TAG } from "../../utils/toDomEventName";
 
 // TODO: Create object for the key
 const ROOT_SECRET_KEY = "ROOT_SECRET_KEY";
@@ -45,18 +46,14 @@ export class VirtualDOMElement {
     return this.children
       .map((child) => {
         if (typeof child === "string") {
-          return child;
-        }
-
-        if (typeof child === "function") {
-          const componentInstance = new this.tag({
-            ...this.props,
-            children,
+          const textKey = `${key}.${CHILD_SECRET_KEY}.${index}.__text`;
+          index++;
+          return createVirtualTreeNode({
+            key: textKey,
+            tag: TEXT_TAG,
+            props: { nodeValue: child },
+            children: [],
           });
-
-          const virtualDomSubTree = componentInstance.render();
-
-          return virtualDomSubTree.generateVirtualTree(parentData);
         }
 
         if (!child) {
@@ -66,7 +63,7 @@ export class VirtualDOMElement {
           return null;
         }
 
-        if (child.key) {
+        if (child.key !== undefined && child.key !== null) {
           // If the child has a key, we don't need to increment the index.
           // This is done to ensure that the keys are the same for elements outside of arrays
           // where the elements are dynamic and we need to give them there own unique key.

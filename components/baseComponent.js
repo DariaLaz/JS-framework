@@ -29,7 +29,7 @@ class BaseComponent {
    * @param {Object} partialState - The new partial state to merge into the component’s current state.
    */
   setState(partialState) {
-    console.log(this.state)
+    console.log(this.state);
     const newState = { ...this.state, ...partialState };
 
     if (shallowEqual(this.state, newState)) {
@@ -37,7 +37,7 @@ class BaseComponent {
     }
 
     this.state = newState;
-    console.log(newState)
+    console.log(newState);
     this.update();
   }
 
@@ -47,8 +47,26 @@ class BaseComponent {
    */
   generateVirtualDomTree() {
     const root = this.render();
+    if (!root) return null;
 
-    return root?.generateVirtualTree();
+    // nested component, current key: "<parentKey>.CHILD_SECRET_KEY.<index>"
+    const currentKey = this.virtualDomTree?.key;
+
+    if (currentKey && currentKey.includes(".CHILD_SECRET_KEY.")) {
+      const marker = ".CHILD_SECRET_KEY.";
+      const pos = currentKey.lastIndexOf(marker);
+
+      const parentKey = currentKey.slice(0, pos);
+      const indexStr = currentKey.slice(pos + marker.length);
+      const index = Number(indexStr);
+
+      if (Number.isFinite(index)) {
+        return root.generateVirtualTree({ parentKey, index });
+      }
+    }
+
+    // top-level component => ROOT_SECRET_KEY
+    return root.generateVirtualTree();
   }
 
   // TODO Custom Components pass root to children somehow
@@ -63,7 +81,16 @@ class BaseComponent {
   update() {
     const newVirtualTree = this.generateVirtualDomTree();
 
-    applyVirtualDOMDifferences(this.virtualDomTree, newVirtualTree, this.root);
+    const updatedRealRoot = applyVirtualDOMDifferences(
+      this.virtualDomTree,
+      newVirtualTree,
+      this.root,
+    );
+
+    if (updatedRealRoot) {
+      this.realDomTree = updatedRealRoot;
+    }
+
     this.virtualDomTree = newVirtualTree;
   }
 
@@ -82,15 +109,20 @@ class BaseComponent {
     }
 
     this.root.appendChild(realDomTree);
+    this.realDomTree = realDomTree;
   }
 
   /**
    * Detaches the component from the DOM.
    */
   detach() {
+    if (!this.realDomTree) {
+      return;
+    }
     if (this.realDomTree.parentNode) {
       this.realDomTree.parentNode.removeChild(this.realDomTree);
     }
+    this.realDomTree = null;
   }
 }
 

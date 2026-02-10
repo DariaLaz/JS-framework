@@ -13,6 +13,7 @@ export function applyVirtualDOMDifferences(oldTree, newTree, root) {
 
   console.log(patch);
 
-  patch?.apply(root);
+  const updatedRoot = patch?.apply(root);
   hookManager.runHooks();
+  return updatedRoot;
 }

@@ -5,15 +5,31 @@ import { RemovePatch } from "./Patches/RemovePatch";
 import { ReplacePatch } from "./Patches/ReplacePatch";
 import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
 import { NodePatch } from "./Patches/NodePatch";
+import { TEXT_TAG } from "../../utils/toDomEventName";
 
 /**
  * @param {VirtualTreeNode} child
  * @returns {{type: string, text: string} | {type: string, element: VirtualTreeNode}}
  */
 function addTypeToElement(child) {
-  return typeof child === "string"
-    ? { type: "text", text: child }
-    : { type: "element", element: child };
+  if (child == null || child === false || child === true) return null;
+
+  if (child.tag === TEXT_TAG) {
+    return {
+      type: "text",
+      key: child.key,
+      text: child.props?.nodeValue ?? "",
+      element: child,
+    };
+  }
+
+  return { type: "element", key: child.key, element: child };
+}
+
+function normalizeChildren(arr) {
+  return (arr ?? [])
+    .flat(Infinity)
+    .filter((c) => c !== null && c !== undefined && c !== false && c !== true);
 }
 
 /**
@@ -23,26 +39,35 @@ function addTypeToElement(child) {
  * @returns {{removedPatches: NodePatch[], restOldChildren: ({type: string, text: string} | {type: string, element: VirtualTreeNode})[]}}
  */
 function getRemovedNodes(oldNode, newNode) {
-  const oldChildren = oldNode.children.map(addTypeToElement);
-  const newChildren = newNode.children.map(addTypeToElement);
+  const oldChildren = normalizeChildren(oldNode.children)
+    .map(addTypeToElement)
+    .filter(Boolean);
+
+  const newChildren = normalizeChildren(newNode.children)
+    .map(addTypeToElement)
+    .filter(Boolean);
 
   const removed = oldChildren.filter(
     (child) =>
-      !newChildren.find(
-        (newChild) =>
-          child.type === newChild.type &&
-          (child.type === "text"
-            ? child.text === newChild.text
-            : child.element.key === newChild.element.key &&
-              // TODO Custom Components add logic here
-              child.element.tag === newChild.element.tag)
-      )
+      !newChildren.find((newChild) => {
+        if (!child || !newChild) return false;
+        if (child.type !== newChild.type) return false;
+
+        if (child.type === "text") {
+          return child.key === newChild.key;
+        }
+
+        return (
+          child.element.key === newChild.element.key &&
+          child.element.tag === newChild.element.tag
+        );
+      }),
   );
 
   const removedPatches = removed.map((child) => {
     if (child.type === "text") {
       return NodePatch.create({
-        elementPatch: TextPatch.create(undefined),
+        elementPatch: RemovePatch.create(child.key),
       });
     }
 
@@ -52,7 +77,7 @@ function getRemovedNodes(oldNode, newNode) {
   });
 
   const restOldChildren = oldChildren.filter(
-    (child) => !removed.includes(child)
+    (child) => !removed.includes(child),
   );
 
   return { removedPatches, restOldChildren };
@@ -64,47 +89,36 @@ function getRemovedNodes(oldNode, newNode) {
  * @returns {NodePatch[]}
  */
 function getChildrenPatches(oldNode, newNode) {
-  const { removedPatches, restOldChildren } = getRemovedNodes(oldNode, newNode);
+  const { removedPatches } = getRemovedNodes(oldNode, newNode);
 
-  const newChildren = newNode.children.map(addTypeToElement);
+  const oldChildren = normalizeChildren(oldNode.children)
+    .map(addTypeToElement)
+    .filter(Boolean);
 
-  let indexInOldNode = 0;
-  const newTreePatches = newChildren.map((child, index) => {
-    if (indexInOldNode > restOldChildren.length - 1) {
+  const newChildren = normalizeChildren(newNode.children)
+    .map(addTypeToElement)
+    .filter(Boolean);
+
+  const oldByKey = new Map();
+  for (const c of oldChildren) {
+    const k = c.type === "text" ? c.key : c.element.key;
+    oldByKey.set(k, c);
+  }
+
+  const newTreePatches = newChildren.map((c, index) => {
+    const k = c.type === "text" ? c.key : c.element.key;
+    const oldChild = oldByKey.get(k);
+
+    if (!oldChild) {
+      const nodeToCreate = c.element;
       return NodePatch.create({
-        elementPatch:
-          child.type === "text"
-            ? TextPatch.create(child.text)
-            : CreatePatch.create(child.element, index),
+        elementPatch: CreatePatch.create(oldNode.key, nodeToCreate, index),
       });
     }
 
-    const oldChild = restOldChildren[indexInOldNode];
-
-    if (child.type === "text" && oldChild.type === "text") {
-      indexInOldNode++;
-      return child.text !== oldChild.text
-        ? NodePatch.create({
-            // TODO ?? maybe add types to this shit no need to map them everywhere
-            elementPatch: TextPatch.create(child.text),
-          })
-        : undefined;
-    }
-
-    if (
-      child.type === "element" &&
-      oldChild.type === "element" &&
-      child.element.key === oldChild.element.key &&
-      // TODO Custom Components add logic here
-      child.element.tag === oldChild.element.tag
-    ) {
-      indexInOldNode++;
-      return generateNodePatch(oldChild.element, child.element);
-    }
-
-    return NodePatch.create({
-      elementPatch: CreatePatch.create(child.element, index),
-    });
+    const oldElem = oldChild.element;
+    const newElem = c.element;
+    return generateNodePatch(oldElem, newElem);
   });
 
   return [...removedPatches, ...newTreePatches].filter(Boolean);
@@ -120,6 +134,19 @@ function getChildrenPatches(oldNode, newNode) {
 export function generateNodePatch(oldNode, newNode) {
   // Key/Tag check and patch generation
   // Mostly for the root node
+  if (oldNode == null && newNode == null) {
+    return null;
+  }
+
+  if (oldNode == null && newNode != null) {
+    return null;
+  }
+
+  if (oldNode != null && newNode == null) {
+    return NodePatch.create({
+      elementPatch: RemovePatch.create(oldNode.key),
+    });
+  }
   if (
     oldNode.key !== newNode.key ||
     // TODO Custom Components add logic here
@@ -135,7 +162,7 @@ export function generateNodePatch(oldNode, newNode) {
   const propsPatch = PropsPatch.create(
     newNode.key,
     oldNode.props,
-    newNode.props
+    newNode.props,
   );
 
   const childrenPatches = getChildrenPatches(oldNode, newNode);

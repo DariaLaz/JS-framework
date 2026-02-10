@@ -11,24 +11,28 @@ helloComponent.attachTo(document.body);
 
 useEffect(() => {
   console.log("Effect called");
-}, [helloComponent]);
+});
+
+useEffect(() => {
+  console.log("Effect called, message:", helloComponent.state?.message);
+}, [helloComponent.state?.message]);
+
+setTimeout(() => {
+  helloComponent.setState({ message: "Goodbye" });
+}, 1000);
+
+setTimeout(() => {
+  helloComponent.setState({ message: "Hello again" });
+}, 2000);
+
+setTimeout(() => {
+  helloComponent.setState({ showButton: false });
+}, 3000);
+
+setTimeout(() => {
+  helloComponent.setState({ showButton: true });
+}, 4000);
 
 // setTimeout(() => {
-//   helloComponent.setState({ message: "Goodbye" });
-// }, 1000);
-
-// setTimeout(() => {
-//   helloComponent.setState({ message: "Hello again" });
-// }, 2000);
-
-// setTimeout(() => {
-//   helloComponent.setState({ showButton: false });
-// }, 3000);
-
-// setTimeout(() => {
-//   helloComponent.setState({ showButton: true });
-// }, 4000);
-
-// setTimeout(() => {
-//     helloComponent.detach();
+//   helloComponent.detach();
 // }, 5000);

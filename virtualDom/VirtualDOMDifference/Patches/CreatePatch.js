@@ -1,19 +1,17 @@
 import { generateRealDOMElement } from "../../generateDOM/generateRealDOMElement";
-import { VirtualTreeNode } from "../../virtualDom/VirtualTreeNode";
 
 export class CreatePatch {
-  constructor(virtualNode, index) {
+  constructor(parentKey, virtualNode, index) {
+    this.parentKey = parentKey;
     this.virtualNode = virtualNode;
     this.index = index;
   }
-
   /**
    *
-   * @param {VirtualTreeNode} virtualNode
    * @returns {CreatePatch}
    */
-  static create(virtualNode, index) {
-    return new CreatePatch(virtualNode, index);
+  static create(parentKey, virtualNode, index) {
+    return new CreatePatch(parentKey, virtualNode, index);
   }
 
   /**
@@ -21,17 +19,17 @@ export class CreatePatch {
    * @returns {HTMLElement}
    */
   apply(root) {
+    const parent = document.getElementById(String(this.parentKey));
+
+    if (!parent) {
+      throw new Error(`CreatePatch: parent not found by id=${this.parentKey}`);
+    }
+
     const element = generateRealDOMElement(this.virtualNode);
+    if (!element) return;
 
-    if (!element) {
-      return;
-    }
-
-    if (this.index < root.childNodes.length) {
-      root.insertBefore(element, root.childNodes[this.index]);
-    } else {
-      root.appendChild(element);
-    }
+    const before = parent.childNodes[this.index] ?? null;
+    parent.insertBefore(element, before);
 
     return element;
   }

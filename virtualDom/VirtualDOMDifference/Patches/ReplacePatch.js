@@ -25,15 +25,16 @@ export class ReplacePatch {
    */
   apply(root) {
     const element = generateRealDOMElement(this.newNode);
+    if (!element) return;
 
     const oldElement = selectElement(root, this.oldNodeId);
 
-    if (!element) {
-      return;
+    if (!oldElement) {
+      root.appendChild(element);
+      return element;
     }
 
-    root.replaceChild(element, oldElement);
-
+    oldElement.parentNode?.replaceChild(element, oldElement);
     return element;
   }
 }

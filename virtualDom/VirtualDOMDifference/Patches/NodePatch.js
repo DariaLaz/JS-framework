@@ -32,11 +32,13 @@ export class NodePatch {
       (this.key ? selectElement(root, this.key) : undefined);
 
     if (!domElement || !this.childrenPatches) {
-      return;
+      return domElement;
     }
 
     this.childrenPatches.forEach((childPatch) => {
       childPatch.apply(domElement);
     });
+
+    return domElement;
   }
 }

@@ -1,3 +1,5 @@
 export function selectElement(root, id) {
-  return root.querySelector(`[id="${id}"]`);
+  if (!id) return null;
+
+  return document.getElementById(String(id));
 }

@@ -19,8 +19,9 @@ export class RemovePatch {
    */
   apply(root) {
     const node = selectElement(root, this.id);
-    root.removeChild(node);
+    if (!node) return null;
 
+    node.parentNode?.removeChild(node);
     return null;
   }
 }
