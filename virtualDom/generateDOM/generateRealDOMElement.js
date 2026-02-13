@@ -66,6 +66,11 @@ function generateComponent(virtualDomElement) {
     const dom = generateRealDOMElement(scopedTree);
     componentInstance.realDomTree = dom;
 
+    if (!componentInstance.isMounted) {
+      componentInstance.runEffects();
+      componentInstance.isMounted = true;
+    }
+
     return dom;
   }
 

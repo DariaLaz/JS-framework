@@ -5,13 +5,22 @@ class ListExample extends BaseComponent {
   constructor(props) {
     super(props);
     this.state = {
-      items: ["Apple", "Banana", "Cherry"],
+      items: ["JS", "JS2", "Not JS"],
       nextId: 3,
     };
   }
 
   addItem = () => {
-    const fruits = ["Mango", "Peach", "Grape", "Kiwi", "Lemon", "Pear", "Plum", "Fig"];
+    const fruits = [
+      "JS",
+      "JS2",
+      "Not JS",
+      "React",
+      "Not react",
+      "React Lite",
+      "Temu React",
+      "Bananaa",
+    ];
     const fruit = fruits[this.state.nextId % fruits.length];
     this.setState({
       items: [...this.state.items, fruit],

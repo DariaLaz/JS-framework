@@ -1,6 +1,7 @@
 import { generateRealDOMElement } from "../virtualDom/generateDOM/generateRealDOMElement";
 import { applyVirtualDOMDifferences } from "../virtualDom/VirtualDOMDifference/applyVirtualDOMDifferences";
 import { shallowEqual } from "../utils/shallowEqual";
+import { CHILD_SECRET_KEY } from "../virtualDom/virtualDom/VirtualDOMElement";
 
 class BaseComponent {
   constructor(props = {}) {
@@ -10,6 +11,7 @@ class BaseComponent {
     this.realDomTree = null; // To store the previous Real DOM tree
     this.effectHooks = [];
     this.effectIndex = 0;
+    this.isMounted = false;
   }
 
   /**
@@ -37,6 +39,8 @@ class BaseComponent {
   }
 
   runEffects() {
+    this.runningEffects = true;
+
     for (const effect of this.effectHooks) {
       const depsChanged =
         !effect.oldDependencies ||
@@ -53,6 +57,14 @@ class BaseComponent {
           : null;
       }
     }
+
+    this.runningEffects = false;
+
+    if (this.pendingStateFromEffects) {
+      const pendingState = this.pendingStateFromEffects;
+      this.pendingStateFromEffects = null;
+      this.setState(pendingState);
+    }
   }
 
   /**
@@ -60,7 +72,14 @@ class BaseComponent {
    * @param {Object} partialState - The new partial state to merge into the component’s current state.
    */
   setState(partialState) {
-    console.log(this.state);
+    if (this.runningEffects) {
+      this.pendingStateFromEffects = {
+        ...(this.pendingStateFromEffects ?? {}),
+        ...partialState,
+      };
+      return;
+    }
+
     const newState = { ...this.state, ...partialState };
 
     if (shallowEqual(this.state, newState)) {
@@ -68,7 +87,6 @@ class BaseComponent {
     }
 
     this.state = newState;
-    console.log(newState);
     this.update();
   }
 
@@ -79,12 +97,13 @@ class BaseComponent {
   generateVirtualDomTree() {
     this.effectIndex = 0;
     const root = this.render();
+
     if (!root) return null;
 
     const currentKey = this.virtualDomTree?.key;
 
-    if (currentKey && currentKey.includes(".CHILD_SECRET_KEY.")) {
-      const marker = ".CHILD_SECRET_KEY.";
+    if (currentKey && currentKey.includes(`.${CHILD_SECRET_KEY}.`)) {
+      const marker = `.${CHILD_SECRET_KEY}.`;
       const pos = currentKey.lastIndexOf(marker);
 
       const parentKey = currentKey.slice(0, pos);

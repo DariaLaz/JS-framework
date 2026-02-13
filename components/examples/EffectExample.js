@@ -9,14 +9,13 @@ class EffectExample extends BaseComponent {
       message: "Hello",
       timerRunning: false,
       timerTicks: 0,
-      effectLog: [],
     };
+    this.effectLog = [];
   }
 
   appendLog = (entry) => {
     const maxEntries = 10;
-    const newLog = [...this.state.effectLog, entry].slice(-maxEntries);
-    return newLog;
+    this.effectLog = [...this.effectLog, entry].slice(-maxEntries);
   };
 
   triggerRender = () => {
@@ -24,7 +23,7 @@ class EffectExample extends BaseComponent {
   };
 
   changeMessage = () => {
-    const messages = ["Hello", "World", "Framework", "Virtual DOM", "Effects"];
+    const messages = ["Hello", "World", "React", "Virtual DOM", "Effects"];
     const currentIndex = messages.indexOf(this.state.message);
     const nextIndex = (currentIndex + 1) % messages.length;
     this.setState({ message: messages[nextIndex] });
@@ -36,23 +35,20 @@ class EffectExample extends BaseComponent {
 
   render() {
     this.useEffect(() => {
-      const log = this.appendLog(
+      this.appendLog(
         "Effect 1: Ran (every render) - render #" + this.state.renderCount,
       );
-      this.state.effectLog = log;
     });
 
     this.useEffect(() => {
-      const log = this.appendLog(
+      this.appendLog(
         'Effect 2: Message changed to "' + this.state.message + '"',
       );
-      this.state.effectLog = log;
     }, [this.state.message]);
 
     this.useEffect(() => {
       if (this.state.timerRunning) {
-        const log = this.appendLog("Effect 3: Timer started");
-        this.state.effectLog = log;
+        this.appendLog("Effect 3: Timer started");
 
         const intervalId = setInterval(() => {
           this.setState({ timerTicks: this.state.timerTicks + 1 });
@@ -60,10 +56,7 @@ class EffectExample extends BaseComponent {
 
         return () => {
           clearInterval(intervalId);
-          const cleanupLog = this.appendLog(
-            "Effect 3: Timer cleaned up (interval cleared)",
-          );
-          this.state.effectLog = cleanupLog;
+          this.appendLog("Effect 3: Timer cleaned up (interval cleared)");
         };
       }
     }, [this.state.timerRunning]);
@@ -160,7 +153,7 @@ class EffectExample extends BaseComponent {
               props: null,
               children: ["Effect Log"],
             }),
-            ...this.state.effectLog.map((entry, i) =>
+            ...this.effectLog.map((entry, i) =>
               createElement({
                 key: "elog-" + i,
                 tag: "p",
@@ -171,7 +164,7 @@ class EffectExample extends BaseComponent {
                 children: [entry],
               }),
             ),
-            this.state.effectLog.length === 0
+            this.effectLog.length === 0
               ? createElement({
                   tag: "p",
                   props: { style: "color: #888; font-style: italic" },
