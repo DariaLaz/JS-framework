@@ -6,6 +6,7 @@ import { ReplacePatch } from "./Patches/ReplacePatch";
 import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
 import { NodePatch } from "./Patches/NodePatch";
 import { TEXT_TAG } from "../../utils/toDomEventName";
+import { CHILD_SECRET_KEY } from "../virtualDom/VirtualDOMElement";
 
 /**
  * @param {VirtualTreeNode} child
@@ -30,6 +31,18 @@ function normalizeChildren(arr) {
   return (arr ?? [])
     .flat(Infinity)
     .filter((c) => c !== null && c !== undefined && c !== false && c !== true);
+}
+
+function getRemovableKey(node) {
+  if (!node) {
+    return undefined;
+  }
+
+  if (typeof node.tag === "function") {
+    return `${node.key}.${CHILD_SECRET_KEY}.0`;
+  }
+
+  return node.key;
 }
 
 /**
@@ -72,7 +85,7 @@ function getRemovedNodes(oldNode, newNode) {
     }
 
     return NodePatch.create({
-      elementPatch: RemovePatch.create(child.element.key),
+      elementPatch: RemovePatch.create(getRemovableKey(child.element)),
     });
   });
 
@@ -147,18 +160,12 @@ export function generateNodePatch(oldNode, newNode) {
       elementPatch: RemovePatch.create(oldNode.key),
     });
   }
-  if (
-    oldNode.key !== newNode.key ||
-    // TODO Custom Components add logic here
-    oldNode.tag !== newNode.tag
-  ) {
+  if (oldNode.key !== newNode.key || oldNode.tag !== newNode.tag) {
     return NodePatch.create({
       elementPatch: ReplacePatch.create(oldNode.key, newNode),
     });
   }
 
-  // TODO Add shallowEqual for memoised components
-  // if (shallowEqual(oldNode.props, newNode.props)) {
   const propsPatch = PropsPatch.create(
     newNode.key,
     oldNode.props,

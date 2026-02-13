@@ -3,11 +3,6 @@ import { applyVirtualDOMDifferences } from "../virtualDom/VirtualDOMDifference/a
 import { shallowEqual } from "../utils/shallowEqual";
 
 class BaseComponent {
-  /**
-   * Constructs a new BaseComponent instance, initializing props and state.
-   * @constructor
-   * @param {Object} [props={}] - The initial properties for the component.
-   */
   constructor(props = {}) {
     this.props = props;
     this.state = {};
@@ -86,7 +81,6 @@ class BaseComponent {
     const root = this.render();
     if (!root) return null;
 
-    // nested component, current key: "<parentKey>.CHILD_SECRET_KEY.<index>"
     const currentKey = this.virtualDomTree?.key;
 
     if (currentKey && currentKey.includes(".CHILD_SECRET_KEY.")) {
@@ -102,11 +96,9 @@ class BaseComponent {
       }
     }
 
-    // top-level component => ROOT_SECRET_KEY
     return root.generateVirtualTree();
   }
 
-  // TODO Custom Components pass root to children somehow
   // handle render of components inside components;
   // maybe call recursively render
   // Първия път в attachTO се суздава дървото което ще пази стейтовете по нататък.

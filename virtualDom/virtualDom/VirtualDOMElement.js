@@ -1,9 +1,8 @@
 import { createVirtualTreeNode } from "./VirtualTreeNode";
 import { TEXT_TAG } from "../../utils/toDomEventName";
 
-// TODO: Create object for the key
 const ROOT_SECRET_KEY = "ROOT_SECRET_KEY";
-const CHILD_SECRET_KEY = "CHILD_SECRET_KEY";
+export const CHILD_SECRET_KEY = "CHILD_SECRET_KEY";
 
 export class VirtualDOMElement {
   /**
@@ -91,7 +90,6 @@ export class VirtualDOMElement {
 
     return createVirtualTreeNode({
       key,
-      // TODO Custom Components add logic here
       tag: this.tag,
       props: this.props,
       children,

@@ -1,6 +1,7 @@
 import { isDOMEvent } from "../constants/EventListeners";
 import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
 import toDomEventName, { TEXT_TAG } from "../../utils/toDomEventName";
+
 /**
  * @param {VirtualTreeNode} virtualDomElement
  * @returns {HTMLElement | Text}
@@ -8,7 +9,6 @@ import toDomEventName, { TEXT_TAG } from "../../utils/toDomEventName";
 function generateComponent(virtualDomElement) {
   function createHTMLElement() {
     const element = document.createElement(virtualDomElement.tag);
-    // element.setAttribute("data-key", String(virtualDomElement.key));
 
     if (virtualDomElement.props) {
       for (const key in virtualDomElement.props) {
@@ -81,7 +81,7 @@ function generateComponent(virtualDomElement) {
         return span;
       }
 
-      // Normal HTML element (div, button, p, etc.)
+      // Normal HTML element
       return createHTMLElement();
     }
     case "function": {
@@ -120,6 +120,3 @@ export function generateRealDOMElement(virtualDomElement) {
     }
   }
 }
-
-// TODO patch when the element is custom
-// TODO lifecycle methods
