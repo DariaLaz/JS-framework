@@ -1,5 +1,6 @@
 import { isDOMEvent } from "../constants/EventListeners";
 import { VirtualTreeNode } from "../virtualDom/VirtualTreeNode";
+import toDomEventName, { TEXT_TAG } from "../../utils/toDomEventName";
 
 /**
  * @param {VirtualTreeNode} virtualDomElement
@@ -11,10 +12,24 @@ function generateComponent(virtualDomElement) {
 
     if (virtualDomElement.props) {
       for (const key in virtualDomElement.props) {
+        const value = virtualDomElement.props[key];
+
         if (isDOMEvent(key)) {
-          element.addEventListener(key, virtualDomElement.props[key]);
+          const eventName = toDomEventName(key);
+          if (typeof value === "function")
+            element.addEventListener(eventName, value);
+          continue;
+        }
+
+        if (key === "nodeValue") {
+          element.textContent = String(value ?? "");
+          continue;
+        }
+
+        if (value === false || value === null || value === undefined) {
+          element.removeAttribute(key);
         } else {
-          element.setAttribute(key, virtualDomElement.props[key]);
+          element.setAttribute(key, String(value));
         }
       }
     }
@@ -41,20 +56,45 @@ function generateComponent(virtualDomElement) {
     });
 
     const virtualDomSubTree = componentInstance.render();
+    const scopedTree = virtualDomSubTree?.generateVirtualTree({
+      parentKey: virtualDomElement.key,
+      index: 0,
+    });
 
-    return generateRealDOMElement(virtualDomSubTree);
+    componentInstance.virtualDomTree = scopedTree;
+
+    const dom = generateRealDOMElement(scopedTree);
+    componentInstance.realDomTree = dom;
+
+    if (!componentInstance.isMounted) {
+      componentInstance.runEffects();
+      componentInstance.isMounted = true;
+    }
+
+    return dom;
   }
 
   switch (typeof virtualDomElement.tag) {
     case "string": {
-      return createHTMLElement(virtualDomElement);
+      if (virtualDomElement.tag === TEXT_TAG) {
+        const span = document.createElement("span");
+        span.textContent = virtualDomElement.props?.nodeValue ?? "";
+        span.setAttribute("data-vtext", "1");
+        span.id = virtualDomElement.key;
+        span.setAttribute("data-key", String(virtualDomElement.key));
+
+        return span;
+      }
+
+      // Normal HTML element
+      return createHTMLElement();
     }
     case "function": {
       return createCustomElement(virtualDomElement);
     }
     default: {
       throw new Error(
-        "Invalid tag type " + JSON.stringify(virtualDomElement, null, 2)
+        "Invalid tag type " + JSON.stringify(virtualDomElement, null, 2),
       );
     }
   }
@@ -80,11 +120,8 @@ export function generateRealDOMElement(virtualDomElement) {
     default: {
       throw new Error(
         "Invalid virtual DOM element " +
-          JSON.stringify(virtualDomElement, null, 2)
+          JSON.stringify(virtualDomElement, null, 2),
       );
     }
   }
 }
-
-// TODO patch when the element is custom
-// TODO lifecycle methods

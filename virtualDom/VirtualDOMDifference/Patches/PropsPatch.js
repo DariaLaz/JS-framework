@@ -8,7 +8,7 @@ export class PropsPatch {
     toBeAddedAttributes,
     toBeAddedEventListeners,
     toBeRemovedAttributes,
-    toBeRemovedEventListeners
+    toBeRemovedEventListeners,
   ) {
     this.toBeAddedAttributes = toBeAddedAttributes;
     this.toBeAddedEventListeners = toBeAddedEventListeners;
@@ -28,7 +28,7 @@ export class PropsPatch {
 
     const { added, same, removed } = arrayDiff(
       Object.keys(oldProps),
-      Object.keys(newProps)
+      Object.keys(newProps),
     );
 
     const changed = same.filter((key) => oldProps[key] !== newProps[key]);
@@ -68,7 +68,7 @@ export class PropsPatch {
       toBeAddedAttributes,
       toBeAddedEventListeners,
       toBeRemovedAttributes,
-      toBeRemovedEventListeners
+      toBeRemovedEventListeners,
     );
   }
 
@@ -79,9 +79,14 @@ export class PropsPatch {
    */
   apply(root) {
     const node = selectElement(root, this.id);
+    if (!node) return null;
 
-    for (const { key } of this.toBeRemovedAttributes) {
-      node.removeAttribute(key);
+    for (const key of this.toBeRemovedAttributes) {
+      if (key === "nodeValue") {
+        node.textContent = "";
+      } else {
+        node.removeAttribute(key);
+      }
     }
 
     for (const { key, value } of this.toBeRemovedEventListeners) {
@@ -89,7 +94,16 @@ export class PropsPatch {
     }
 
     for (const { key, value } of this.toBeAddedAttributes) {
-      node.setAttribute(key, value);
+      if (key === "nodeValue") {
+        node.textContent = String(value ?? "");
+        continue;
+      }
+
+      if (value === false || value === null || value === undefined) {
+        node.removeAttribute(key);
+      } else {
+        node.setAttribute(key, String(value));
+      }
     }
 
     for (const { key, value } of this.toBeAddedEventListeners) {
