@@ -17,6 +17,14 @@ class ExampleComponent extends BaseComponent {
   };
 
   render() {
+    this.useEffect(() => {
+      console.log("Effect called");
+    });
+
+    this.useEffect(() => {
+      console.log("Effect called, message:", this.state.message);
+    }, [this.state.message]);
+
     return createElement({
       tag: "div",
       props: { class: "example-component" },

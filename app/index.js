@@ -1,5 +1,4 @@
 import ExampleComponent from "../components/exampleComponent.js";
-import { useEffect } from "../hooks/useEffect.js";
 
 const helloComponent = new ExampleComponent({
   greeting: "Hello, World!",
@@ -8,14 +7,6 @@ const helloComponent = new ExampleComponent({
 });
 
 helloComponent.attachTo(document.body);
-
-useEffect(() => {
-  console.log("Effect called");
-});
-
-useEffect(() => {
-  console.log("Effect called, message:", helloComponent.state?.message);
-}, [helloComponent.state?.message]);
 
 setTimeout(() => {
   helloComponent.setState({ message: "Goodbye" });

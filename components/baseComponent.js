@@ -13,6 +13,8 @@ class BaseComponent {
     this.state = {};
     this.virtualDomTree = null; // To store the previous VDOM tree
     this.realDomTree = null; // To store the previous Real DOM tree
+    this.effectHooks = [];
+    this.effectIndex = 0;
   }
 
   /**
@@ -22,6 +24,40 @@ class BaseComponent {
    */
   render() {
     throw new Error("Method not implemented.");
+  }
+
+  useEffect(callback, dependencies) {
+    const index = this.effectIndex++;
+    if (index >= this.effectHooks.length) {
+      this.effectHooks.push({
+        callback,
+        cleanup: null,
+        dependencies,
+        oldDependencies: null,
+      });
+    } else {
+      this.effectHooks[index].callback = callback;
+      this.effectHooks[index].dependencies = dependencies;
+    }
+  }
+
+  runEffects() {
+    for (const effect of this.effectHooks) {
+      const depsChanged =
+        !effect.oldDependencies ||
+        !shallowEqual(effect.oldDependencies, effect.dependencies);
+
+      if (depsChanged) {
+        if (typeof effect.cleanup === "function") {
+          effect.cleanup();
+        }
+
+        effect.cleanup = effect.callback();
+        effect.oldDependencies = effect.dependencies
+          ? [...effect.dependencies]
+          : null;
+      }
+    }
   }
 
   /**
@@ -46,6 +82,7 @@ class BaseComponent {
    * @returns {Object | null} - The newly generated virtual DOM tree, or null if none.
    */
   generateVirtualDomTree() {
+    this.effectIndex = 0;
     const root = this.render();
     if (!root) return null;
 
@@ -92,6 +129,7 @@ class BaseComponent {
     }
 
     this.virtualDomTree = newVirtualTree;
+    this.runEffects();
   }
 
   /**
@@ -110,6 +148,7 @@ class BaseComponent {
 
     this.root.appendChild(realDomTree);
     this.realDomTree = realDomTree;
+    this.runEffects();
   }
 
   /**
