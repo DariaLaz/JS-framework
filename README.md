@@ -58,4 +58,3 @@ The `BaseComponent` class is designed to manage the lifecycle and state of compo
 - `setState` -> Merges new state with the existing state and triggers a re-render of the component.
 - `update` -> Generates a new virtual DOM tree, finds the differences with the old tree, and applies the necessary patches to the real DOM.
 - `attachTo` -> Renders the component and attaches it to a specified container in the real DOM.
-- `detach` -> Removes the component from the real DOM.

@@ -110,9 +110,7 @@ class BaseComponent {
       const indexStr = currentKey.slice(pos + marker.length);
       const index = Number(indexStr);
 
-      if (Number.isFinite(index)) {
-        return root.generateVirtualTree({ parentKey, index });
-      }
+      return root.generateVirtualTree({ parentKey, index });
     }
 
     return root.generateVirtualTree();
@@ -160,19 +158,6 @@ class BaseComponent {
     this.root.appendChild(realDomTree);
     this.realDomTree = realDomTree;
     this.runEffects();
-  }
-
-  /**
-   * Detaches the component from the DOM.
-   */
-  detach() {
-    if (!this.realDomTree) {
-      return;
-    }
-    if (this.realDomTree.parentNode) {
-      this.realDomTree.parentNode.removeChild(this.realDomTree);
-    }
-    this.realDomTree = null;
   }
 }
 
